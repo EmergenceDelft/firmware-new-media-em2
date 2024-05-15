@@ -1,27 +1,20 @@
-#include <Arduino.h>
-#include <ArduinoWebsockets.h>
-#include <WiFi.h>
-#include <ArduinoJson.h>
-#include <SRF05.h>
+#include <main.h>
+#include <UltrasoundSensor.h>
 
-#define TRIGGER_PIN 4
-#define ECHO_PIN 16
+const char* ssid = "NPRouter"; //Enter SSID
+const char* password = "keepitquantum"; //Enter Password
+const char* websockets_server = "ws://192.168.4.2:3000/echo"; //server adress and port
 
-
-const char* ssid = "VlietlaanVlinders"; //Enter SSID
-const char* password = "Braktouba45"; //Enter Password
-const char* websockets_server = "ws://192.168.2.5:3000/echo"; //server adress and port
-
-using namespace websockets;
 WebsocketsClient client;
-SRF05 SRF(TRIGGER_PIN, ECHO_PIN);
 TaskHandle_t pollingTaskHandle;
-
+UltrasoundSensor ultrasoundSensor;
 
 
 void onMessageCallback(WebsocketsMessage message) {
-    Serial.print("Got Message: ");
-    Serial.println(message.data());
+    JsonDocument jsonMessage;
+    deserializeJson(jsonMessage, message.data());
+
+    String msgType = jsonMessage["type"];
 }
  
 void onEventsCallback(WebsocketsEvent event, String data) {
@@ -42,11 +35,18 @@ String getHelloMessage() {
     doc["type"] = "hello";
     doc["mac_address"] = WiFi.macAddress();
 
-    String serializedDoc;
+    JsonDocument arrayDoc;
+    JsonArray sensorArray = arrayDoc.to<JsonArray>();
 
+    sensorArray.add("ULTRASOUND");
+
+    doc["sensors"] = sensorArray;
+
+    String serializedDoc;
     serializeJson(doc, serializedDoc);
     return serializedDoc;
 }
+
 
 void pollingTask( void * pvParameters ){
     for(;;) {
@@ -56,10 +56,8 @@ void pollingTask( void * pvParameters ){
 
 void setup() {
     Serial.begin(115200);
-    // Connect to wifi
-    WiFi.begin(ssid, password);
 
-    // Wait some time to connect to wifi
+    WiFi.begin(ssid, password);
     for(int i = 0; i < 10 && WiFi.status() != WL_CONNECTED; i++) {
         Serial.print(".");
         delay(1000);
@@ -67,30 +65,23 @@ void setup() {
     
     Serial.print("Connected to wifi");
 
-    // Setup Callbacks
     client.onMessage(onMessageCallback);
     client.onEvent(onEventsCallback);
-    
-    // Connect to server
     client.connect(websockets_server);
-
-    // Send a message
+    
+    //Send hello message on connection.
     client.send(getHelloMessage());
-    // Send a ping
-    client.ping();
+
+    //Setup sensors
+    ultrasoundSensor.setup(WiFi.macAddress() + ":ULTRASOUND");
+
 
     //All polling code is executed on a different thread to keep the main thread open for reading sensor data.
-    xTaskCreatePinnedToCore(
-             pollingTask,  /* Task function. */
-             "Sensor task",    /* name of task. */
-             10000,      /* Stack size of task */
-             NULL,       /* parameter of the task */
-             1,          /* priority of the task */
-             &pollingTaskHandle,     /* Task handle to keep track of created task */
-             0);         /* pin task to core 0 */
+    // xTaskCreatePinnedToCore(pollingTask, "Sensor task", 10000, NULL, 1, &pollingTaskHandle, CORE_0);         
 }
 
 void loop() {
-    Serial.println(SRF.getCentimeter(), 1);
+    client.poll();
+    client.send(ultrasoundSensor.getJsonSerializedReadings());
     delay(1000);
 }
