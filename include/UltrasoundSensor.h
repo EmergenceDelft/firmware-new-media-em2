@@ -1,5 +1,5 @@
 /*
- * Lock.h - Library managing an Ultrasonic Sensor.
+ * UltrasoundSensor.h - Library managing an Ultrasonic Sensor.
  */
 #ifndef UltrasoundSensor_h
 #define UltrasoundSensor_h
@@ -9,9 +9,8 @@
 class UltrasoundSensor
 {
 public:
-  UltrasoundSensor();
+  UltrasoundSensor(String id);
   String getJsonSerializedReadings();
-  void setup(String id);
 
 private:
   String _id;

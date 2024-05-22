@@ -6,15 +6,11 @@
 
 SRF05 sensor(ULTRASONIC_TRIGGER_PIN, ULTRASONIC_ECHO_PIN);
 
-UltrasoundSensor::UltrasoundSensor()
-{
-}
-
-void UltrasoundSensor::setup(String id)
+UltrasoundSensor::UltrasoundSensor(String id)
 {
     _id = id;
-}
 
+}
 
 String UltrasoundSensor::getJsonSerializedReadings() {
     JsonDocument doc;

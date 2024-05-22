@@ -1,20 +1,31 @@
 #include <main.h>
 #include <UltrasoundSensor.h>
+#include <Motor.h>
+
 
 const char* ssid = "NPRouter"; //Enter SSID
 const char* password = "keepitquantum"; //Enter Password
-const char* websockets_server = "ws://192.168.4.2:3000/echo"; //server adress and port
+const char* websockets_server = "ws://192.168.4.5:3000/echo"; //server adress and port
 
 WebsocketsClient client;
 TaskHandle_t pollingTaskHandle;
-UltrasoundSensor ultrasoundSensor;
-
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+UltrasoundSensor ultrasoundSensor(WiFi.macAddress() + "//ULTRASOUND");
+Motor motor1(WiFi.macAddress() + "//" + 0, 0, pwm);
 
 void onMessageCallback(WebsocketsMessage message) {
+    Serial.println(message.data());
     JsonDocument jsonMessage;
     deserializeJson(jsonMessage, message.data());
 
-    String msgType = jsonMessage["type"];
+    if(jsonMessage.containsKey("angle")) {
+        int angle = jsonMessage["angle"];
+        if(angle == 90) {
+          pwm.setPWM(0, 0, 550);
+        } else {
+          pwm.setPWM(0, 0, 125);
+        }
+    }
 }
  
 void onEventsCallback(WebsocketsEvent event, String data) {
@@ -41,6 +52,8 @@ String getHelloMessage() {
     sensorArray.add("ULTRASOUND");
 
     doc["sensors"] = sensorArray;
+    doc["motor_amount"] = 5;
+
 
     String serializedDoc;
     serializeJson(doc, serializedDoc);
@@ -48,11 +61,11 @@ String getHelloMessage() {
 }
 
 
-void pollingTask( void * pvParameters ){
-    for(;;) {
-        client.poll();
-    }
-}
+// void pollingTask( void * pvParameters ){
+//     for(;;) {
+//         client.poll();
+//     }
+// }
 
 void setup() {
     Serial.begin(115200);
@@ -72,9 +85,9 @@ void setup() {
     //Send hello message on connection.
     client.send(getHelloMessage());
 
-    //Setup sensors
-    ultrasoundSensor.setup(WiFi.macAddress() + ":ULTRASOUND");
-
+    //Setup pwm
+    pwm.begin();
+    pwm.setPWMFreq(SERVO_PWM_FREQUENCY);
 
     //All polling code is executed on a different thread to keep the main thread open for reading sensor data.
     // xTaskCreatePinnedToCore(pollingTask, "Sensor task", 10000, NULL, 1, &pollingTaskHandle, CORE_0);         
