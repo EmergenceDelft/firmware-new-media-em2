@@ -4,11 +4,10 @@
 
 #include "Motor.h"
 
-Motor::Motor(String id, int address, Adafruit_PWMServoDriver pwm)
+Motor::Motor(int address, Adafruit_PWMServoDriver pwm)
 {
-    _id = id;
-    _pwm = pwm;
     _address = address;
+    _pwm = pwm;
 }
 
 void Motor::setAngle(int angle) {

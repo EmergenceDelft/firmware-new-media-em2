@@ -9,9 +9,8 @@
 class Motor
 {
 public:
-  Motor(String id, int address, Adafruit_PWMServoDriver pwm);
+  Motor(int address, Adafruit_PWMServoDriver pwm);
   void setAngle(int degrees);
-  void setup(String id);
 
 private:
   String _id;
