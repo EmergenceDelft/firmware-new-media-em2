@@ -80,6 +80,7 @@ void setup() {
 
 void loop() {
     client.poll();
+    Serial.println(ultrasoundSensor.getJsonSerializedReadings());
     client.send(ultrasoundSensor.getJsonSerializedReadings());
     delay(1000);
 }
