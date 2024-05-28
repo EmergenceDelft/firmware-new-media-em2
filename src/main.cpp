@@ -7,6 +7,10 @@ WebsocketsClient client;
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 UltrasoundSensor ultrasoundSensor(WiFi.macAddress() + "::ULTRASOUND");
 
+std::vector<Motor> motors;       // Global vector for motors
+std::vector<int> targetAngles;   // Global vector for target angles
+int numMotors = 10; //this should get updated onMessageCallback but have it as something just in case?
+int interval = 30; //default interval
 
 void onMessageCallback(WebsocketsMessage message) {
     Serial.println(message.data());
@@ -15,54 +19,24 @@ void onMessageCallback(WebsocketsMessage message) {
 
     if(jsonMessage["type"] == "motor_commands") {
         JsonArray motorArray = jsonMessage["motors"];
+        
+        numMotors = motorArray.size();
+        //not sure how to do this
+        //we want to initialise the std::vector object at setup with all the motors
+        //the motors should be a global variable that stay there and do not get reinitialised
 
-        int numMotors = motorArray.size();
+        //thinking is that we should put the initial numMotors above to high, 30 or so
+        //and then on messages from server, we can set numMotors to be smaller (like 4)
+        //then the main loop only calls update for the 4 of them
 
-        std::vector<Motor> motors;       // Use a vector for motors
-        std::vector<int> targetAngles;   // Use a vector for target angles
-        std::vector<int> currentAngles;
-
-        motors.reserve(numMotors);       // Reserve space for efficiency
-        targetAngles.reserve(numMotors); // Reserve space for efficiency
-        currentAngles.reserve(numMotors);
-
-        int stepSize = 1;
-        int stepDelay = 10;
         for(JsonObject motorJson : motorArray) {
             int address = motorJson["motor_address"];
             int angle = motorJson["angle"];
             if (motorJson.containsKey("stepDelay")) {
-                stepDelay = motorJson["stepDelay"]; // Extract stepDelay from JSON
+                interval = motorJson["stepDelay"]; // Extract stepDelay from JSON
+                motors[address].setInterval(interval);
             }
-
-            motors.emplace_back(address, pwm); // passes addres and pwm, and vector will create a new motor at end automatically
-            targetAngles.push_back(angle);     // Add target angle to the vector
-            currentAngles.push_back(abs(angle - 90)); // Initialize currentAngles
-            // !!!!!!!!
-            //this will need fixing, once we have other angles that are not just 0 or 90
-            
-        }
-
-        
-
-        bool movementCompleted = false;
-        while (!movementCompleted) {
-            movementCompleted = true;
-            for (int i = 0; i < numMotors; i++) {
-                if (currentAngles[i] < targetAngles[i]) {
-                    Serial.println(currentAngles[i]);
-                    currentAngles[i] += stepSize;
-                    if (currentAngles[i] > targetAngles[i]) currentAngles[i] = targetAngles[i]; //this is how we stop
-                    movementCompleted = false;
-                } else if (currentAngles[i] > targetAngles[i]) {
-                    currentAngles[i] -= stepSize;
-                    if (currentAngles[i] < targetAngles[i]) currentAngles[i] = targetAngles[i]; //this is how we stop
-                    movementCompleted = false;
-                }
-                motors[i].setAngle(currentAngles[i]);
-                delay(stepDelay); 
-
-            }   
+            motors[address].setTargetAngle(angle);
         }
     }
 }
@@ -118,7 +92,12 @@ void setup() {
 
     //Setup pwm
     pwm.begin();
-    pwm.setPWMFreq(SERVO_PWM_FREQUENCY);       
+    pwm.setPWMFreq(SERVO_PWM_FREQUENCY);
+
+    motors.reserve(numMotors);
+    for(int i = 0; i < numMotors; i++){
+        motors.emplace_back(i, pwm, interval);
+    }
 }
 
 void loop() {
@@ -127,5 +106,9 @@ void loop() {
     Serial.println("------------");
     Serial.println(sensor_reading);
     client.send(sensor_reading);
+    
+    for(int i = 0; i < numMotors; i++){
+        motors[i].update();
+    }
     //delay(1000);
 }
