@@ -10,7 +10,7 @@
 #include <WiFi.h>
 #include <ArduinoJson.h>
 #include <SRF05.h>
-#include <Adafruit_PWMServoDriver.h> 
+#include <Adafruit_PWMServoDriver.h>
 
 /* Shared variables */
 #define ULTRASONIC_TRIGGER_PIN 4
@@ -21,7 +21,7 @@
 #define SERVO_MAX_PULSE_WIDTH 550 // Maximum pulse width for the servo
 #define SSID "NPRouter" //Enter SSID
 #define PASSWORD "keepitquantum"
-#define CONNECTION_STRING "ws://192.168.4.4:3000/echo"
+#define CONNECTION_STRING "ws://192.168.4.3:3000/echo"
 
 
 

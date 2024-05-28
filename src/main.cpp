@@ -1,6 +1,7 @@
 #include <main.h>
 #include <UltrasoundSensor.h>
 #include <Motor.h>
+#include <cmath> 
 
 WebsocketsClient client;
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
@@ -14,12 +15,54 @@ void onMessageCallback(WebsocketsMessage message) {
 
     if(jsonMessage["type"] == "motor_commands") {
         JsonArray motorArray = jsonMessage["motors"];
+
+        int numMotors = motorArray.size();
+
+        std::vector<Motor> motors;       // Use a vector for motors
+        std::vector<int> targetAngles;   // Use a vector for target angles
+        std::vector<int> currentAngles;
+
+        motors.reserve(numMotors);       // Reserve space for efficiency
+        targetAngles.reserve(numMotors); // Reserve space for efficiency
+        currentAngles.reserve(numMotors);
+
+        int stepSize = 1;
+        int stepDelay = 10;
         for(JsonObject motorJson : motorArray) {
             int address = motorJson["motor_address"];
             int angle = motorJson["angle"];
+            if (motorJson.containsKey("stepDelay")) {
+                stepDelay = motorJson["stepDelay"]; // Extract stepDelay from JSON
+            }
 
-            Motor motor(address, pwm);
-            motor.setAngle(angle);
+            motors.emplace_back(address, pwm); // passes addres and pwm, and vector will create a new motor at end automatically
+            targetAngles.push_back(angle);     // Add target angle to the vector
+            currentAngles.push_back(abs(angle - 90)); // Initialize currentAngles
+            // !!!!!!!!
+            //this will need fixing, once we have other angles that are not just 0 or 90
+            
+        }
+
+        
+
+        bool movementCompleted = false;
+        while (!movementCompleted) {
+            movementCompleted = true;
+            for (int i = 0; i < numMotors; i++) {
+                if (currentAngles[i] < targetAngles[i]) {
+                    Serial.println(currentAngles[i]);
+                    currentAngles[i] += stepSize;
+                    if (currentAngles[i] > targetAngles[i]) currentAngles[i] = targetAngles[i]; //this is how we stop
+                    movementCompleted = false;
+                } else if (currentAngles[i] > targetAngles[i]) {
+                    currentAngles[i] -= stepSize;
+                    if (currentAngles[i] < targetAngles[i]) currentAngles[i] = targetAngles[i]; //this is how we stop
+                    movementCompleted = false;
+                }
+                motors[i].setAngle(currentAngles[i]);
+                delay(stepDelay); 
+
+            }   
         }
     }
 }
@@ -71,7 +114,7 @@ void setup() {
     client.connect(CONNECTION_STRING);
     
     //Send hello message on connection.
-    client.send(getHelloMessage());
+    client.send(getHelloMessage()); 
 
     //Setup pwm
     pwm.begin();
@@ -80,6 +123,9 @@ void setup() {
 
 void loop() {
     client.poll();
-    client.send(ultrasoundSensor.getJsonSerializedReadings());
-    delay(1000);
+    String sensor_reading = ultrasoundSensor.getJsonSerializedReadings();
+    Serial.println("------------");
+    Serial.println(sensor_reading);
+    client.send(sensor_reading);
+    //delay(1000);
 }
