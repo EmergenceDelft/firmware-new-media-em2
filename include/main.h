@@ -15,6 +15,7 @@
 /* Shared variables */
 #define ULTRASONIC_TRIGGER_PIN 4
 #define ULTRASONIC_ECHO_PIN 16
+#define NOISE_INPUT_PIN 34
 #define CORE_0 0
 #define SERVO_PWM_FREQUENCY 50.0f
 #define SERVO_MIN_PULSE_WIDTH 125 // Minimum pulse width for the servo

@@ -48,7 +48,7 @@ void Motor::update() {
         _current_angle += _increment;
         setAngle(_current_angle);
         
-        Serial.println(_current_angle);
+        //Serial.println(_current_angle);
 
     }
 }

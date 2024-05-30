@@ -1,16 +1,19 @@
 #include <main.h>
 #include <UltrasoundSensor.h>
 #include <Motor.h>
+#include <Microphone.h>
 #include <cmath> 
 
 WebsocketsClient client;
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 UltrasoundSensor ultrasoundSensor(WiFi.macAddress() + "::ULTRASOUND");
+Microphone microphone(WiFi.macAddress() + "::MICROPHONE", NOISE_INPUT_PIN);
+
 
 std::vector<Motor> motors;       // Global vector for motors
 std::vector<int> targetAngles;   // Global vector for target angles
 int numMotors = 10; //this should get updated onMessageCallback but have it as something just in case?
-int interval = 30; //default interval
+int interval = 15; //default interval
 
 void onMessageCallback(WebsocketsMessage message) {
     Serial.println(message.data());
@@ -63,6 +66,7 @@ String getHelloMessage() {
     JsonArray sensorArray = arrayDoc.to<JsonArray>();
 
     sensorArray.add("ULTRASOUND");
+    sensorArray.add("MICROPHONE");
 
     doc["sensors"] = sensorArray;
 
@@ -81,7 +85,7 @@ void setup() {
         delay(1000);
     }
     
-    Serial.print("Connected to wifi");
+    //Serial.print("Connected to wifi");
 
     client.onMessage(onMessageCallback);
     client.onEvent(onEventsCallback);
@@ -103,10 +107,14 @@ void setup() {
 void loop() {
     client.poll();
     String sensor_reading = ultrasoundSensor.getJsonSerializedReadings();
-    Serial.println("------------");
-    Serial.println(sensor_reading);
+    //Serial.println("------------");
+    //Serial.println(sensor_reading);
     client.send(sensor_reading);
-    
+    String microphone_reading = microphone.getJsonSerializedReadings();
+    //Serial.println("-------------");
+    //Serial.println(microphone_reading);
+    client.send(microphone_reading);
+
     for(int i = 0; i < numMotors; i++){
         motors[i].update();
     }

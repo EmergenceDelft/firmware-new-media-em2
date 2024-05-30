@@ -14,6 +14,7 @@ public:
 
 private:
   String _id;
+  unsigned int latest_value;
 };
 
 #endif
