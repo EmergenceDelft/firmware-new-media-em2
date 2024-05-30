@@ -1,4 +1,9 @@
 {
     "cmake.configureOnOpen": true,
-    "idf.portWin": "COM7"
+    "idf.portWin": "COM7",
+    "files.associations": {
+        "new": "cpp",
+        "*.tcc": "cpp",
+        "algorithm": "cpp"
+    }
 }
