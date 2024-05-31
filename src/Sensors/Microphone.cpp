@@ -5,7 +5,7 @@
 #include "Microphone.h"
 #include <algorithm>
 
-#define BACKGROUND_AMPLTITUDE 2500
+#define BACKGROUND_AMPLTITUDE 0
 
 //SRF05 sensor(ULTRASONIC_TRIGGER_PIN, ULTRASONIC_ECHO_PIN);
 

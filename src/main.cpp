@@ -34,12 +34,20 @@ void onMessageCallback(WebsocketsMessage message) {
 
         for(JsonObject motorJson : motorArray) {
             int address = motorJson["motor_address"];
-            int angle = motorJson["angle"];
+            // int interval = 10;
+            if (motorJson.containsKey("angle")) {
+                int angle = motorJson["angle"];
+                motors[address].setTargetAngle(angle);
+            }
+            if (motorJson.containsKey("movement")) {
+                bool move = motorJson["movement"];
+                motors[address].setMovement(move);
+            }
             if (motorJson.containsKey("stepDelay")) {
                 interval = motorJson["stepDelay"]; // Extract stepDelay from JSON
-                motors[address].setInterval(interval);
+                
             }
-            motors[address].setTargetAngle(angle);
+            motors[address].setInterval(interval);
         }
     }
 }
@@ -99,19 +107,27 @@ void setup() {
     pwm.setPWMFreq(SERVO_PWM_FREQUENCY);
 
     motors.reserve(numMotors);
-    for(int i = 0; i < numMotors; i++){
-        motors.emplace_back(i, pwm, interval);
+    for(int i = 0; i < numMotors/2; i++){
+
+        //false for transparency motor and true for color motor
+        //this is very ugly i am sorry
+        //but it's late on friday and did not feel like properly doing a motor Object with two children who inherit it
+
+        motors.emplace_back(i, pwm, interval, false);
+        motors.emplace_back(i, pwm, interval, true);
+
     }
 }
 
 void loop() {
     client.poll();
-    String sensor_reading = ultrasoundSensor.getJsonSerializedReadings();
+    //Serial.println("hello");
+    //String sensor_reading = ultrasoundSensor.getJsonSerializedReadings();
     //Serial.println("------------");
     //Serial.println(sensor_reading);
-    client.send(sensor_reading);
+    //client.send(sensor_reading);
     String microphone_reading = microphone.getJsonSerializedReadings();
-    //Serial.println("-------------");
+   // Serial.println("-------------");
     //Serial.println(microphone_reading);
     client.send(microphone_reading);
 
