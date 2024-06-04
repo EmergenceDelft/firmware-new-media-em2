@@ -12,26 +12,28 @@
 #include <NewPing.h>
 #include <Adafruit_PWMServoDriver.h>
 
-/* Shared variables */
+/* Ultrasonic sensor  */
 #define ULTRASONIC_TRIGGER_ECHO_PIN 22
-#define NOISE_INPUT_PIN 4
-#define CORE_0 0
+
+/* Microphone */
+#define NOISE_INPUT_PIN 15
+#define BACKGROUND_AMPLITUDE 2500
+
+/* Servo controller */
 #define SERVO_PWM_FREQUENCY 50.0f
-#define SERVO_MIN_PULSE_WIDTH 125 // Minimum pulse width for the servo
-#define SERVO_MAX_PULSE_WIDTH 550 // Maximum pulse width for the servo
-#define SSID "NPRouter" //Enter SSID
+#define SERVO_MIN_PULSE_WIDTH 125 
+#define SERVO_MAX_PULSE_WIDTH 550 
+
+/* Router credentials */
+#define SSID "NPRouter"
 #define PASSWORD "keepitquantum"
-#define CONNECTION_STRING "ws://192.168.4.3:3000/echo"
-
-
-
+#define CONNECTION_STRING "ws://192.168.4.3:3000/echo" 
 
 enum SensorType {
     ULTRASOUND,
     LOUDNESS,
     CAPACITIVE
 };
-
 
 using namespace websockets;
 

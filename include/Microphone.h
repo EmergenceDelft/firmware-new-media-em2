@@ -1,6 +1,7 @@
 /*
- * Microphone.h - Library managing an Ultrasonic Sensor.
+ * Microphone.h - Library for Microphone MAX4466.
  */
+
 #ifndef Microphone_h
 #define Microphone_h
 
@@ -16,8 +17,6 @@ public:
 private:
   String _id;
   int _AMP_PIN;
-  //int _sample_window = 50;
-//   unsigned int _latest_value = 0;
 };
 
 #endif

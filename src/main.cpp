@@ -12,8 +12,8 @@ Microphone microphone(WiFi.macAddress() + "::MICROPHONE", NOISE_INPUT_PIN);
 
 std::vector<Motor> motors;       // Global vector for motors
 std::vector<int> targetAngles;   // Global vector for target angles
-int numMotors = 10; //this should get updated onMessageCallback but have it as something just in case?
-int interval = 15; //default interval
+int numMotors = 10; 
+int interval = 15; 
 
 void onMessageCallback(WebsocketsMessage message) {
     Serial.println(message.data());
@@ -24,14 +24,6 @@ void onMessageCallback(WebsocketsMessage message) {
         JsonArray motorArray = jsonMessage["motors"];
         
         numMotors = motorArray.size();
-        //not sure how to do this
-        //we want to initialise the std::vector object at setup with all the motors
-        //the motors should be a global variable that stay there and do not get reinitialised
-
-        //thinking is that we should put the initial numMotors above to high, 30 or so
-        //and then on messages from server, we can set numMotors to be smaller (like 4)
-        //then the main loop only calls update for the 4 of them
-
         for(JsonObject motorJson : motorArray) {
             int address = motorJson["motor_address"];
             int angle = motorJson["angle"];
@@ -107,10 +99,14 @@ void setup() {
 
 void loop() {
     client.poll();
+    
+    /* Get and send ultrasound sensor readings to server */
     String sensor_reading = ultrasoundSensor.getJsonSerializedReadings();
-    //Serial.println("------------");/
+    Serial.println("------------");
     Serial.println(sensor_reading);
     client.send(sensor_reading);
+
+    /* Get and send microphone sensor readings to server */
     String microphone_reading = microphone.getJsonSerializedReadings();
     Serial.println("-------------");
     Serial.println(microphone_reading);
@@ -119,5 +115,4 @@ void loop() {
     for(int i = 0; i < numMotors; i++){
         motors[i].update();
     }
-    //delay(1000);
 }
