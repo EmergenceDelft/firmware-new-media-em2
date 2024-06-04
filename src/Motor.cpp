@@ -1,5 +1,5 @@
 /*
- * Motor.cpp - Library for Ultrasonic Sensor.
+ * Motor.cpp - Library managing an PWM motor driver PCA9685.
  */
 
 #include "Motor.h"

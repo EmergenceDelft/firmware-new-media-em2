@@ -12,11 +12,11 @@
 #include <NewPing.h>
 #include <Adafruit_PWMServoDriver.h>
 
-/* Ultrasonic sensor  */
-#define ULTRASONIC_TRIGGER_ECHO_PIN 22
+/* Ultrasound sensor  */
+#define ULTRASOUND_TRIGGER_ECHO_PIN 22
 
 /* Microphone */
-#define NOISE_INPUT_PIN 15
+#define NOISE_INPUT_PIN 34
 #define BACKGROUND_AMPLITUDE 2500
 
 /* Servo controller */

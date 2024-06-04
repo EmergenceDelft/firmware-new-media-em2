@@ -4,9 +4,8 @@
 
 #include "UltrasoundSensor.h"
 
-NewPing sensor(ULTRASONIC_TRIGGER_ECHO_PIN, ULTRASONIC_TRIGGER_ECHO_PIN);
-
-UltrasoundSensor::UltrasoundSensor(String id)
+UltrasoundSensor::UltrasoundSensor(String id, uint8_t triggerEchoPin)
+    : sensor(triggerEchoPin, triggerEchoPin)
 {
     _id = id;
 }
@@ -20,11 +19,6 @@ String UltrasoundSensor::getJsonSerializedReadings() {
     doc["value"] = sensor.ping_cm();
 
     String serializedDoc;
-
     serializeJson(doc, serializedDoc);
     return serializedDoc;
 }
-
-
-
-

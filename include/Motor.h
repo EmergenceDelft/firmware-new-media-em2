@@ -1,5 +1,5 @@
 /*
- * Lock.h - Library managing an Ultrasonic Sensor.
+ * Motor.h - Library managing an PWM motor driver PCA9685.
  */
 #ifndef Motor_h
 #define Motor_h

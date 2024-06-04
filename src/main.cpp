@@ -6,7 +6,7 @@
 
 WebsocketsClient client;
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
-UltrasoundSensor ultrasoundSensor(WiFi.macAddress() + "::ULTRASOUND");
+UltrasoundSensor ultrasoundSensor(WiFi.macAddress() + "::ULTRASOUND", ULTRASOUND_TRIGGER_ECHO_PIN);
 Microphone microphone(WiFi.macAddress() + "::MICROPHONE", NOISE_INPUT_PIN);
 
 
@@ -84,7 +84,7 @@ void setup() {
     client.onEvent(onEventsCallback);
     client.connect(CONNECTION_STRING);
     
-    //Send hello message on connection.
+    /* Send hello message on connection. */
     client.send(getHelloMessage()); 
 
     //Setup pwm
@@ -115,4 +115,5 @@ void loop() {
     for(int i = 0; i < numMotors; i++){
         motors[i].update();
     }
+    delay(400);
 }

@@ -13,10 +13,12 @@ Microphone::Microphone(String id, int AMP_PIN)
 String Microphone::getJsonSerializedReadings() {
     JsonDocument doc;
 
+    int sensorValue = measureAnalog();
+
     doc["type"] = "sensor_reading";
     doc["sensor_type"] = "MICROPHONE";
     doc["sensor_id"] = _id;
-    doc["value"] = measureAnalog()- BACKGROUND_AMPLITUDE ;
+    doc["value"] = sensorValue;
 
     String serializedDoc;
 
@@ -24,22 +26,20 @@ String Microphone::getJsonSerializedReadings() {
     return serializedDoc;
 }
 
-unsigned long Microphone::measureAnalog()
+int Microphone::measureAnalog()
 {
     int micSamples = 100;
-    long signalAvg = 0, signalMax = 0, signalMin = 50024;
+    int signalAvg = 0, signalMax = 0, signalMin = 50024;
     for (int i = 0; i < micSamples; i++)
     {
-        long k = analogRead(_AMP_PIN);
+        int k = analogRead(_AMP_PIN);
         
-
         signalMin = min(signalMin, k);
         signalMax = max(signalMax, k);
         signalAvg += k;
     }
 
     signalAvg /= micSamples;
-    Serial.println(signalMax - signalMin);
 
     return signalMax - signalMin;
 }
