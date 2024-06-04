@@ -84,8 +84,9 @@ void setup() {
         Serial.print(".");
         delay(1000);
     }
+
     
-    //Serial.print("Connected to wifi");
+    Serial.print("Connected to wifi");
 
     client.onMessage(onMessageCallback);
     client.onEvent(onEventsCallback);
@@ -107,12 +108,12 @@ void setup() {
 void loop() {
     client.poll();
     String sensor_reading = ultrasoundSensor.getJsonSerializedReadings();
-    //Serial.println("------------");
-    //Serial.println(sensor_reading);
+    //Serial.println("------------");/
+    Serial.println(sensor_reading);
     client.send(sensor_reading);
     String microphone_reading = microphone.getJsonSerializedReadings();
-    //Serial.println("-------------");
-    //Serial.println(microphone_reading);
+    Serial.println("-------------");
+    Serial.println(microphone_reading);
     client.send(microphone_reading);
 
     for(int i = 0; i < numMotors; i++){

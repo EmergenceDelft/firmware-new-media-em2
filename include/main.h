@@ -9,13 +9,12 @@
 #include <ArduinoWebsockets.h>
 #include <WiFi.h>
 #include <ArduinoJson.h>
-#include <SRF05.h>
+#include <NewPing.h>
 #include <Adafruit_PWMServoDriver.h>
 
 /* Shared variables */
-#define ULTRASONIC_TRIGGER_PIN 4
-#define ULTRASONIC_ECHO_PIN 16
-#define NOISE_INPUT_PIN 34
+#define ULTRASONIC_TRIGGER_ECHO_PIN 22
+#define NOISE_INPUT_PIN 4
 #define CORE_0 0
 #define SERVO_PWM_FREQUENCY 50.0f
 #define SERVO_MIN_PULSE_WIDTH 125 // Minimum pulse width for the servo
