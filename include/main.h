@@ -20,14 +20,16 @@
 #define BACKGROUND_AMPLITUDE 2500
 
 /* Servo controller */
+#define SCL_PIN 14
+#define SDA_PIN 27
 #define SERVO_PWM_FREQUENCY 50.0f
-#define SERVO_MIN_PULSE_WIDTH 125 
-#define SERVO_MAX_PULSE_WIDTH 550 
+#define SERVO_MIN_PULSE_WIDTH 100 
+#define SERVO_MAX_PULSE_WIDTH 525 
 
 /* Router credentials */
 #define SSID "NPRouter"
 #define PASSWORD "keepitquantum"
-#define CONNECTION_STRING "ws://192.168.4.3:3000/echo" 
+#define CONNECTION_STRING "ws://192.168.4.4:3000/echo" 
 
 enum SensorType {
     ULTRASOUND,

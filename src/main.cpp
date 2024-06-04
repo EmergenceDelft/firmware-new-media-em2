@@ -87,7 +87,8 @@ void setup() {
     /* Send hello message on connection. */
     client.send(getHelloMessage()); 
 
-    //Setup pwm
+    /* Set the I2C pins to the pins configured for the custom hardware */
+    Wire.begin(SDA_PIN, SCL_PIN);
     pwm.begin();
     pwm.setPWMFreq(SERVO_PWM_FREQUENCY);
 
