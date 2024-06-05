@@ -5,13 +5,14 @@
 #include <cmath> 
 
 WebsocketsClient client;
-Adafruit_PWMServoDriver pwm;
-UltrasoundSensor ultrasoundSensor(WiFi.macAddress() + "::ULTRASOUND");
+Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
+UltrasoundSensor ultrasoundSensor(WiFi.macAddress() + "::ULTRASOUND", ULTRASOUND_TRIGGER_ECHO_PIN);
 Microphone microphone(WiFi.macAddress() + "::MICROPHONE", NOISE_INPUT_PIN);
 
 
 std::vector<Motor> motors;       // Global vector for motors
 std::vector<int> targetAngles;   // Global vector for target angles
+
 int numMotors = 2; //this should get updated onMessageCallback but have it as something just in case?
 int interval = 10; //default interval
 unsigned long lastUpdate = 0;
@@ -26,14 +27,6 @@ void onMessageCallback(WebsocketsMessage message) {
         JsonArray motorArray = jsonMessage["motors"];
         
         numMotors = motorArray.size();
-        //not sure how to do this
-        //we want to initialise the std::vector object at setup with all the motors
-        //the motors should be a global variable that stay there and do not get reinitialised
-
-        //thinking is that we should put the initial numMotors above to high, 30 or so
-        //and then on messages from server, we can set numMotors to be smaller (like 4)
-        //then the main loop only calls update for the 4 of them
-
         for(JsonObject motorJson : motorArray) {
             int address = motorJson["motor_address"];
             // int interval = 10;
@@ -96,28 +89,26 @@ void setup() {
         delay(1000);
     }
     
+    Serial.println("Connected to wifi");
 
     client.onMessage(onMessageCallback);
     client.onEvent(onEventsCallback);
     client.connect(CONNECTION_STRING);
     
-    //Send hello message on connection.
+    /* Send hello message on connection. */
     client.send(getHelloMessage()); 
     delay(1000);
 
-    //Setup pwm
-
+    /* Set the I2C pins to the pins configured for the custom hardware */
+    Wire.begin(SDA_PIN, SCL_PIN);
     pwm.begin();
     pwm.setPWMFreq(SERVO_PWM_FREQUENCY);
     Serial.println("done with pwm");
 
     motors.reserve(numMotors);
     for(int i = 0; i < numMotors/2; i+=2){
-
         //false for transparency motor and true for color motor
-        //this is very ugly i am sorry
-        //but it's late on friday and did not feel like properly doing a motor Object with two children who inherit it
-
+        
         motors.emplace_back(i, pwm, interval, false);
         motors.emplace_back(i+1, pwm, interval, true);
 

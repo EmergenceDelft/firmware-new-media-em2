@@ -4,12 +4,10 @@
 
 #include "UltrasoundSensor.h"
 
-SRF05 sensor(ULTRASONIC_TRIGGER_PIN, ULTRASONIC_ECHO_PIN);
-
-UltrasoundSensor::UltrasoundSensor(String id)
+UltrasoundSensor::UltrasoundSensor(String id, uint8_t triggerEchoPin)
+    : sensor(triggerEchoPin, triggerEchoPin)
 {
     _id = id;
-
 }
 
 String UltrasoundSensor::getJsonSerializedReadings() {
@@ -18,14 +16,9 @@ String UltrasoundSensor::getJsonSerializedReadings() {
     doc["type"] = "sensor_reading";
     doc["sensor_type"] = "ULTRASOUND";
     doc["sensor_id"] = _id;
-    doc["value"] = sensor.getMeter();
+    doc["value"] = sensor.ping_cm();
 
     String serializedDoc;
-
     serializeJson(doc, serializedDoc);
     return serializedDoc;
 }
-
-
-
-

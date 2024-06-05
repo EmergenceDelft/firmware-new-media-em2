@@ -1,5 +1,5 @@
 /*
- * UltrasoundSensor.h - Library managing an Ultrasonic Sensor.
+ * UltrasoundSensor.h - Library managing an ultrasound sensor HY-SRF05.
  */
 #ifndef UltrasoundSensor_h
 #define UltrasoundSensor_h
@@ -9,12 +9,12 @@
 class UltrasoundSensor
 {
 public:
-  UltrasoundSensor(String id);
+  UltrasoundSensor(String id, uint8_t triggerEchoPin);
   String getJsonSerializedReadings();
 
 private:
   String _id;
-  unsigned int latest_value;
+  NewPing sensor;
 };
 
 #endif
