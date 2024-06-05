@@ -33,15 +33,15 @@ String Microphone::getJsonSerializedReadings() {
 
 unsigned long Microphone::measureAnalog()
 {
-    int micSamples = 100;
+    int micSamples = 2;
     long signalAvg = 0, signalMax = 0, signalMin = 50024;
     for (int i = 0; i < micSamples; i++)
     {
         long k = analogRead(_AMP_PIN);
         
 
-        signalMin = min(signalMin, k);
-        signalMax = max(signalMax, k);
+        // signalMin = min(signalMin, k);
+        // signalMax = max(signalMax, k);
         signalAvg += k;
     }
     // Serial.println("max min");
@@ -50,10 +50,9 @@ unsigned long Microphone::measureAnalog()
 
 
     signalAvg /= micSamples;
-    Serial.println(signalMax - signalMin);
     //Serial.println("microphone signal avg");
     //Serial.println(signalAvg);
-    return signalMax - signalMin;
+    return signalAvg;
 }
 
 // void update() {

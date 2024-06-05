@@ -66,10 +66,8 @@ void Motor::updateTransparencyMotor() {
 }
 
 void Motor::updateColorMotor() {
-    Serial.println(_moving);
 
     if((millis() - _last_update) > _interval && _moving){
-        Serial.println(_current_angle);
         if(_current_angle >= 180){
             _increment = -1;
         }
