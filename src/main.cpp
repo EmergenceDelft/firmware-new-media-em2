@@ -14,9 +14,10 @@ std::vector<Motor> motors;       // Global vector for motors
 std::vector<int> targetAngles;   // Global vector for target angles
 
 int numMotors = 2; //this should get updated onMessageCallback but have it as something just in case?
-int interval = 10; //default interval
+int interval = 10; //default interval for updating motors
 unsigned long lastUpdate = 0;
 unsigned long lastUpdateClient = 0;
+bool jitter = true;
 
 void onMessageCallback(WebsocketsMessage message) {
     Serial.println(message.data());
@@ -124,6 +125,8 @@ void updateSensors() {
         client.send(microphone_reading);
         Serial.println(microphone_reading);
         lastUpdate = millis();
+
+        jitter = microphone.getLatest() > 500;
     }
 }
 
@@ -141,6 +144,7 @@ void loop() {
     updateClientConnection();
     
     for(int i = 0; i < numMotors; i++){
+        motors[i].setJitter(jitter);
         motors[i].update();
     }
 }

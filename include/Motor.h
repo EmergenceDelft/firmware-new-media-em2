@@ -13,7 +13,8 @@ public:
   void update();
   void setTargetAngle(int angle);
   void setInterval(int interval);
-  void setMovement(bool angle);
+  void setMovement(bool move);
+  void setJitter(bool jitter);
 
 private:
 
@@ -22,6 +23,7 @@ private:
   Adafruit_PWMServoDriver _pwm;
   bool _is_color_filter;
   bool _moving;
+  bool _jitter;
   int _current_angle;
   int _target_angle;
   int _increment;

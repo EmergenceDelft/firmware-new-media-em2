@@ -3,7 +3,9 @@
  */
 
 #include "Motor.h"
+#include <random>
 
+bool _movingTowards180;
 
 Motor::Motor(int address, Adafruit_PWMServoDriver pwm, int interval, bool isColor)
 {
@@ -35,6 +37,10 @@ void Motor::setInterval(int interval){
     _interval = interval;
 }
 
+void Motor::setJitter(bool jitter){
+    _jitter = jitter;
+}
+
 long Motor::angleToPulseWidth(int angle) {
     return map(angle, 0, 180, SERVO_MIN_PULSE_WIDTH, SERVO_MAX_PULSE_WIDTH);
 }
@@ -64,15 +70,35 @@ void Motor::updateTransparencyMotor() {
 
     }
 }
+int generateRandomBetween(int a, int b) {
+    int random_integer = rand() % (b+1);
+    return random_integer + a;
+}
 
 void Motor::updateColorMotor() {
 
     if((millis() - _last_update) > _interval && _moving){
+
         if(_current_angle >= 180){
-            _increment = -1;
+            _movingTowards180 = false;
         }
         if(_current_angle <= 0){
-            _increment = 1;
+            _movingTowards180 = true;
+        }
+
+        if(_jitter) {
+            int random_nr = generateRandomBetween(-2,5);
+            if(_movingTowards180) {
+                _increment = random_nr;
+            }else {
+                _increment = -random_nr;
+            }
+        }else{
+            if(_movingTowards180) {
+                _increment = 1;
+            }else {
+                _increment = -1;
+            }
         }
 
         _last_update = millis();
@@ -81,6 +107,8 @@ void Motor::updateColorMotor() {
 
     }
 }
+
+
 
 
 
