@@ -53,9 +53,9 @@ void Motor::updateTransparencyMotor() {
 
         //set increment according to whether we need to increase or decrease current_angle
         if(_current_angle < _target_angle){
-            _increment = 1;
+            _increment = 10;
         }else{
-            _increment = -1;
+            _increment = -10;
         }
 
         _last_update = millis();

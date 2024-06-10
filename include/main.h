@@ -14,8 +14,8 @@
 #include <Wire.h>
 
 /* processing intervals  */
-#define SENSOR_INTERVAL 500
-#define CLIENT_INTERVAL 50
+#define SENSOR_INTERVAL 100
+#define CLIENT_INTERVAL 100
 
 /* Ultrasound sensor  */
 #define ULTRASOUND_TRIGGER_ECHO_PIN 22
@@ -34,7 +34,7 @@
 /* Router credentials */
 #define SSID "NPRouter"
 #define PASSWORD "keepitquantum"
-#define CONNECTION_STRING "ws://192.168.4.4:3000/echo" 
+#define CONNECTION_STRING "ws://192.168.4.5:3000/echo" 
 
 enum SensorType {
     ULTRASOUND,

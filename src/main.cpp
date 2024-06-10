@@ -122,6 +122,7 @@ void updateSensors() {
         Serial.println(sensor_reading);
         String microphone_reading = microphone.getJsonSerializedReadings();
         client.send(microphone_reading);
+        Serial.println(microphone_reading);
         lastUpdate = millis();
     }
 }
@@ -136,8 +137,9 @@ void updateClientConnection() {
 
 void loop() {
 
-    updateClientConnection();
     updateSensors();
+    updateClientConnection();
+    
     for(int i = 0; i < numMotors; i++){
         motors[i].update();
     }
