@@ -123,7 +123,6 @@ void updateSensors() {
         Serial.println(sensor_reading);
         String microphone_reading = microphone.getJsonSerializedReadings();
         client.send(microphone_reading);
-        Serial.println(microphone_reading);
         lastUpdate = millis();
 
         jitter = microphone.getLatest() > 500;

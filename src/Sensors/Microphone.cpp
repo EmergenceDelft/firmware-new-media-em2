@@ -16,7 +16,6 @@ String Microphone::getJsonSerializedReadings() {
 
     float sensorValue = measureAnalog();
     _latest = sensorValue;
-    Serial.println(sensorValue);
 
     doc["type"] = "sensor_reading";
     doc["sensor_type"] = "MICROPHONE";
