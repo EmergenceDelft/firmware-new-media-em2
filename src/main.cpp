@@ -106,6 +106,10 @@ void setup() {
     pwm.setPWMFreq(SERVO_PWM_FREQUENCY);
     Serial.println("done with pwm");
 
+    //0,1,2,3,4,5,6,7,8,9
+    //0,0,1,1,2,2,3,3,4,4
+    //0,1,0,1,0,1,0,1,0,1
+
     motors.reserve(numMotors);
     for(int i = 0; i < numMotors/2; i+=2){
         //false for transparency motor and true for color motor
@@ -124,6 +128,7 @@ void updateSensors() {
         String microphone_reading = microphone.getJsonSerializedReadings();
         client.send(microphone_reading);
         lastUpdate = millis();
+
 
         jitter = microphone.getLatest() > 500;
     }
@@ -145,6 +150,9 @@ void loop() {
     for(int i = 0; i < numMotors; i++){
         motors[i].setJitter(jitter);
         motors[i].update();
+        String motor_reading = motors[i].getJsonAngle();
+        client.send(motor_reading);
+        Serial.println(motor_reading);
     }
 }
 

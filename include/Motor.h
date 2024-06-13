@@ -15,11 +15,16 @@ public:
   void setInterval(int interval);
   void setMovement(bool move);
   void setJitter(bool jitter);
+  String getJsonAngle();
 
 private:
 
   String _id;
+  int _voxel;
   int _address;
+
+  String _movement;
+
   Adafruit_PWMServoDriver _pwm;
   bool _is_color_filter;
   bool _moving;
