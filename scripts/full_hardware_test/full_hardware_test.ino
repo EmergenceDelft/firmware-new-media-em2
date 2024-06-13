@@ -29,11 +29,21 @@ void setup() {
 void loop() {
     Serial.println(WiFi.macAddress());
     delay(1000);
+
+    /* Servo 0 actuation */
     Serial.println("Servo number 0: 0 degrees");
     pwm.setPWM(0, 0, SERVO_MIN_PULSE_WIDTH);
     delay(1000);
     Serial.println("Servo number 0: 90 degrees");
     pwm.setPWM(0, 0, SERVO_MAX_PULSE_WIDTH);
+    delay(1000);
+
+    /* Servo 1 actuation */
+    Serial.println("Servo number 1: 0 degrees");
+    pwm.setPWM(1, 0, SERVO_MIN_PULSE_WIDTH);
+    delay(1000);
+    Serial.println("Servo number 1: 90 degrees");
+    pwm.setPWM(1, 0, SERVO_MAX_PULSE_WIDTH);
     delay(1000);
 
     Serial.print("Microphone output: ");
