@@ -13,7 +13,7 @@ public:
   void update();
   void setTargetAngle(int angle);
   void setInterval(int interval);
-  void setMovement(bool move);
+  void setMovement(String move);
   void setJitter(bool jitter);
 
 private:
@@ -22,7 +22,7 @@ private:
   int _address;
   Adafruit_PWMServoDriver _pwm;
   bool _is_color_filter;
-  bool _moving;
+  String _movement_type;
   bool _jitter;
   int _current_angle;
   int _target_angle;
@@ -31,8 +31,10 @@ private:
   unsigned long _last_update; // last update of position
   long angleToPulseWidth(int angle);
   void setAngle(int degrees);
-  void updateTransparencyMotor();
-  void updateColorMotor();
+  void updateAuto();
+  void updateAutoJitter();
+  void updateManual();
+  int generateRandomBetween(int a, int b);
 };
 
 #endif

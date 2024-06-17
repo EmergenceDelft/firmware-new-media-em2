@@ -29,8 +29,8 @@ void Motor::setTargetAngle(int angle){
     _target_angle = angle;
 }
 
-void Motor::setMovement(bool move){
-    _moving = move;
+void Motor::setMovement(String move){
+    _movement_type = move;
 }
 
 void Motor::setInterval(int interval){
@@ -47,66 +47,82 @@ long Motor::angleToPulseWidth(int angle) {
 
 void Motor::update() {
 
-    if (_is_color_filter) {
-        updateColorMotor();
-    }else{
-        updateTransparencyMotor();
+    if((millis() - _last_update) > _interval){
+        if(_movement_type.equals("AUTO")){
+            updateAuto();
+        }
+        if(_movement_type.equals("MANUAL")){
+            updateManual();
+        }
+        if(_movement_type.equals("AUTOJITTER")){
+            updateAutoJitter();
+        }
+        _last_update = millis();
     }
 }
 
-void Motor::updateTransparencyMotor() {
-     if((millis() - _last_update) > _interval && _current_angle != _target_angle) {
+void Motor::updateManual() {
+
+    //this is manual move to 0 or 80
+    //put in seperate function so that colorMotor can use it too
+     if(_current_angle != _target_angle) {
+
+        int difference = _target_angle - _current_angle;
 
         //set increment according to whether we need to increase or decrease current_angle
-        if(_current_angle < _target_angle){
-            _increment = 10;
-        }else{
-            _increment = -10;
+        if (difference > 0) {
+            _increment = (difference < 10) ? difference : 10;
+        } else {
+            _increment = (difference > -10) ? difference : -10;
         }
 
-        _last_update = millis();
+        if(_current_angle - _target_angle )
         _current_angle += _increment;
         setAngle(_current_angle);
-
     }
 }
-int generateRandomBetween(int a, int b) {
+
+
+void Motor::updateAuto() {
+
+    //seperate this into auto and auto jitter
+        if(_current_angle >= 180) {
+            _increment = -1;
+        }
+        if(_current_angle <=0) {
+            _increment = 1;
+        }
+        _current_angle += _increment;
+        setAngle(_current_angle);
+}
+
+int Motor::generateRandomBetween(int a, int b) {
     int random_integer = rand() % (b+1);
     return random_integer + a;
 }
 
-void Motor::updateColorMotor() {
+void Motor::updateAutoJitter() {
+    int random_nr = generateRandomBetween(-2,5);
 
-    if((millis() - _last_update) > _interval && _moving){
-
-        if(_current_angle >= 180){
-            _movingTowards180 = false;
-        }
-        if(_current_angle <= 0){
-            _movingTowards180 = true;
-        }
-
-        if(_jitter) {
-            int random_nr = generateRandomBetween(-2,5);
-            if(_movingTowards180) {
-                _increment = random_nr;
-            }else {
-                _increment = -random_nr;
-            }
-        }else{
-            if(_movingTowards180) {
-                _increment = 1;
-            }else {
-                _increment = -1;
-            }
-        }
-
-        _last_update = millis();
-        _current_angle += _increment;
-        setAngle(_current_angle);
-
+    if(_current_angle >= 180){
+        _movingTowards180 = false;
     }
+    if(_current_angle <= 0){
+        _movingTowards180 = true;
+    }
+
+    if(_movingTowards180) {
+        _increment = random_nr;
+    }else{
+        _increment = -random_nr;
+    }
+
+    _current_angle += _increment;
+    setAngle(_current_angle);
 }
+
+
+
 
 
 

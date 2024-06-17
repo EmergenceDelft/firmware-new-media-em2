@@ -36,7 +36,7 @@ void onMessageCallback(WebsocketsMessage message) {
                 motors[address].setTargetAngle(angle);
             }
             if (motorJson.containsKey("movement")) {
-                bool move = motorJson["movement"];
+                String move = motorJson["movement"];
                 motors[address].setMovement(move);
             }
             if (motorJson.containsKey("stepDelay")) {
@@ -53,7 +53,7 @@ void onEventsCallback(WebsocketsEvent event, String data) {
         Serial.println("Connection Opened");
     } else if(event == WebsocketsEvent::ConnectionClosed) {
         Serial.println("Connection Closed");
-        motors[1].setMovement(false);
+        motors[1].setMovement("AUTO");
     } else if(event == WebsocketsEvent::GotPing) {
         Serial.println("Got a Ping!");
     } else if(event == WebsocketsEvent::GotPong) {
@@ -120,12 +120,10 @@ void updateSensors() {
     if((millis() - lastUpdate) > SENSOR_INTERVAL) {
         String sensor_reading = ultrasoundSensor.getJsonSerializedReadings();
         client.send(sensor_reading);
-        Serial.println(sensor_reading);
+        //Serial.println(sensor_reading);
         String microphone_reading = microphone.getJsonSerializedReadings();
-        client.send(microphone_reading);
+        //client.send(microphone_reading);
         lastUpdate = millis();
-
-        jitter = microphone.getLatest() > 500;
     }
 }
 
