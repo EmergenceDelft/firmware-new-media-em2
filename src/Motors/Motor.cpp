@@ -5,7 +5,7 @@
 #include "Motor.h"
 #include <random>
 
-bool _movingTowards180;
+bool _movingTowards120;
 
 Motor::Motor(int address, Adafruit_PWMServoDriver pwm, int interval, bool isColor)
 {
@@ -17,8 +17,6 @@ Motor::Motor(int address, Adafruit_PWMServoDriver pwm, int interval, bool isColo
     _voxel = _address / 2 ;
 
     _id = WiFi.macAddress() + "::VOXEL_" + _voxel + "::MOTOR_" + (_address % 2);
-    
-    _movement = "AUTO";
 
     _pwm = pwm;
     _interval = interval; 
@@ -62,7 +60,7 @@ String Motor::getJsonAngle() {
     doc["type"] = "motor_angle";
     doc["id"] = _id; 
     doc["value"] = _current_angle;
-    doc["movement"] = _movement;
+    doc["movement"] = _movement_type;
 
     String serializedDoc;
 
@@ -111,7 +109,7 @@ void Motor::updateManual() {
 void Motor::updateAuto() {
 
     //seperate this into auto and auto jitter
-        if(_current_angle >= 180) {
+        if(_current_angle >= 120) {
             _increment = -1;
         }
         if(_current_angle <=0) {
@@ -129,14 +127,14 @@ int Motor::generateRandomBetween(int a, int b) {
 void Motor::updateAutoJitter() {
     int random_nr = generateRandomBetween(-2,5);
 
-    if(_current_angle >= 180){
-        _movingTowards180 = false;
+    if(_current_angle >= 120){
+        _movingTowards120 = false;
     }
     if(_current_angle <= 0){
-        _movingTowards180 = true;
+        _movingTowards120 = true;
     }
 
-    if(_movingTowards180) {
+    if(_movingTowards120) {
         _increment = random_nr;
     }else{
         _increment = -random_nr;

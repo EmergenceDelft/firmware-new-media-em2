@@ -124,7 +124,7 @@ void updateSensors() {
     if((millis() - lastUpdate) > SENSOR_INTERVAL) {
         String sensor_reading = ultrasoundSensor.getJsonSerializedReadings();
         client.send(sensor_reading);
-        //Serial.println(sensor_reading);
+        Serial.println(sensor_reading);
         String microphone_reading = microphone.getJsonSerializedReadings();
         //client.send(microphone_reading);
         lastUpdate = millis();
@@ -133,6 +133,10 @@ void updateSensors() {
 
 void updateClientConnection() {
     if((millis() - lastUpdateClient) > CLIENT_INTERVAL){
+        for(int i = 0; i < numMotors; i++){
+            String motor_reading = motors[i].getJsonAngle();
+            client.send(motor_reading);
+        }
         client.poll();
         lastUpdateClient = millis();
     }
@@ -145,11 +149,8 @@ void loop() {
     updateClientConnection();
     
     for(int i = 0; i < numMotors; i++){
-        motors[i].setJitter(jitter);
+        //motors[i].setJitter(jitter);
         motors[i].update();
-        String motor_reading = motors[i].getJsonAngle();
-        client.send(motor_reading);
-        Serial.println(motor_reading);
     }
 }
 
