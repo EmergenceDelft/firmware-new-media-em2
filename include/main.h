@@ -13,7 +13,7 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <Wire.h>
 
-/* processing intervals  */
+/* Processing intervals  */
 #define SENSOR_INTERVAL 100
 #define CLIENT_INTERVAL 100
 
@@ -32,9 +32,9 @@
 #define SERVO_MAX_PULSE_WIDTH 525 
 
 /* Router credentials */
-#define SSID "NPRouter"
+#define SSID "NMPRouter"
 #define PASSWORD "keepitquantum"
-#define CONNECTION_STRING "ws://192.168.4.2:3000/echo" 
+#define CONNECTION_STRING "ws://192.168.12.1:5050/echo" 
 
 enum SensorType {
     ULTRASOUND,

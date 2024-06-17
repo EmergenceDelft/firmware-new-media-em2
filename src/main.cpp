@@ -97,6 +97,7 @@ void setup() {
     client.connect(CONNECTION_STRING);
     
     /* Send hello message on connection. */
+    /* The hello messages is used to subscribe a module to the server. */
     client.send(getHelloMessage()); 
     delay(1000);
 
@@ -104,19 +105,13 @@ void setup() {
     Wire.begin(SDA_PIN, SCL_PIN);
     pwm.begin();
     pwm.setPWMFreq(SERVO_PWM_FREQUENCY);
-    Serial.println("done with pwm");
 
-    //0,1,2,3,4,5,6,7,8,9
-    //0,0,1,1,2,2,3,3,4,4
-    //0,1,0,1,0,1,0,1,0,1
-
+    /* */
     motors.reserve(numMotors);
     for(int i = 0; i < numMotors/2; i+=2){
-        //false for transparency motor and true for color motor
-        
+        /* Emplace_back is using the std::vector library to more efficiently memory allocation  */
         motors.emplace_back(i, pwm, interval, false);
         motors.emplace_back(i+1, pwm, interval, true);
-
     }
 }
 
