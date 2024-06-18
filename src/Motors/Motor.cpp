@@ -86,7 +86,18 @@ void Motor::update() {
 
 void Motor::updateManual() {
      if(_current_angle != _target_angle) {
-        _current_angle = _target_angle;
+        
+        int difference = _target_angle - _current_angle;
+
+        //set increment according to whether we need to increase or decrease current_angle
+        if (difference > 0) {
+            _increment = (difference < 10) ? 1 : 10;
+        } else {
+            _increment = (difference > -10) ? -1 : -10;
+        }
+
+        _current_angle += _increment;
+
         setAngle(_current_angle);
     }
 }
