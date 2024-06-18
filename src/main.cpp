@@ -29,7 +29,14 @@ void onMessageCallback(WebsocketsMessage message) {
         
         numMotors = motorArray.size();
         for(JsonObject motorJson : motorArray) {
-            int address = motorJson["motor_address"];
+            const char* id = motorJson["id"];
+            int address;
+            if (id != nullptr) {
+                String idString = String(id);
+                char lastChar = idString.charAt(idString.length() - 1);
+                int lastInt = lastChar - '0';
+                address = lastInt;
+            }
             // int interval = 10;
             if (motorJson.containsKey("angle")) {
                 int angle = motorJson["angle"];
@@ -119,19 +126,20 @@ void updateSensors() {
     if((millis() - lastUpdate) > SENSOR_INTERVAL) {
         String sensor_reading = ultrasoundSensor.getJsonSerializedReadings();
         client.send(sensor_reading);
-        Serial.println(sensor_reading);
+        //Serial.println(sensor_reading);
         String microphone_reading = microphone.getJsonSerializedReadings();
         //client.send(microphone_reading);
+
+        for(int i = 0; i < numMotors; i++){
+            String motor_reading = motors[i].getJsonAngle();
+            client.send(motor_reading);
+        }
         lastUpdate = millis();
     }
 }
 
 void updateClientConnection() {
     if((millis() - lastUpdateClient) > CLIENT_INTERVAL){
-        for(int i = 0; i < numMotors; i++){
-            String motor_reading = motors[i].getJsonAngle();
-            client.send(motor_reading);
-        }
         client.poll();
         lastUpdateClient = millis();
     }

@@ -59,7 +59,7 @@ String Motor::getJsonAngle() {
 
     doc["type"] = "motor_angle";
     doc["id"] = _id; 
-    doc["value"] = _current_angle;
+    doc["value"] = (_movement_type.equals("MANUAL")) ? _target_angle : _current_angle;
     doc["movement"] = _movement_type;
 
     String serializedDoc;
@@ -85,22 +85,8 @@ void Motor::update() {
 }
 
 void Motor::updateManual() {
-
-    //this is manual move to 0 or 80
-    //put in seperate function so that colorMotor can use it too
      if(_current_angle != _target_angle) {
-
-        int difference = _target_angle - _current_angle;
-
-        //set increment according to whether we need to increase or decrease current_angle
-        if (difference > 0) {
-            _increment = (difference < 10) ? difference : 10;
-        } else {
-            _increment = (difference > -10) ? difference : -10;
-        }
-
-        if(_current_angle - _target_angle )
-        _current_angle += _increment;
+        _current_angle = _target_angle;
         setAngle(_current_angle);
     }
 }
