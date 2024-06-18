@@ -106,7 +106,7 @@ void setup() {
     /* Send hello message on connection. */
     /* The hello messages is used to subscribe a module to the server. */
     client.send(getHelloMessage()); 
-    delay(1000);
+    delay(5000);
 
     /* Set the I2C pins to the pins configured for the custom hardware */
     Wire.begin(SDA_PIN, SCL_PIN);
@@ -128,7 +128,7 @@ void updateSensors() {
         client.send(sensor_reading);
         //Serial.println(sensor_reading);
         String microphone_reading = microphone.getJsonSerializedReadings();
-        //client.send(microphone_reading);
+        client.send(microphone_reading);
 
         for(int i = 0; i < numMotors; i++){
             String motor_reading = motors[i].getJsonAngle();
