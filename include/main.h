@@ -27,15 +27,9 @@
 #define SERVO_MAX_PULSE_WIDTH 525 
 
 /* Router credentials */
-#define SSID "NPRouter"
+#define SSID "NMPRouter"
 #define PASSWORD "keepitquantum"
-#define CONNECTION_STRING "ws://192.168.4.4:3000/echo" 
-
-enum SensorType {
-    ULTRASOUND,
-    LOUDNESS,
-    CAPACITIVE
-};
+#define CONNECTION_STRING "ws://192.168.12.1:5050/echo" 
 
 using namespace websockets;
 
