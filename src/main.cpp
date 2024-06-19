@@ -18,6 +18,10 @@ int interval = 10; //default interval for updating motors
 unsigned long lastUpdate = 0;
 unsigned long lastUpdateClient = 0;
 bool jitter = true;
+bool near = false;
+
+int AUDIO_JITTER_THRESHOLD = 500;
+int PROXIMITY_THRESHOLD = 50;
 
 void onMessageCallback(WebsocketsMessage message) {
     Serial.println(message.data());
@@ -26,7 +30,6 @@ void onMessageCallback(WebsocketsMessage message) {
 
     if(jsonMessage["type"] == "motor_commands") {
         JsonArray motorArray = jsonMessage["motors"];
-        
         numMotors = motorArray.size();
         for(JsonObject motorJson : motorArray) {
             int address = motorJson["motor_address"];
@@ -98,7 +101,7 @@ void setup() {
     
     /* Send hello message on connection. */
     client.send(getHelloMessage()); 
-    delay(1000);
+    delay(2000);
 
     /* Set the I2C pins to the pins configured for the custom hardware */
     Wire.begin(SDA_PIN, SCL_PIN);
@@ -119,14 +122,21 @@ void setup() {
 void updateSensors() {
     if((millis() - lastUpdate) > SENSOR_INTERVAL) {
         String sensor_reading = ultrasoundSensor.getJsonSerializedReadings();
-        client.send(sensor_reading);
+        //client.send(sensor_reading);
         Serial.println(sensor_reading);
         String microphone_reading = microphone.getJsonSerializedReadings();
-        client.send(microphone_reading);
+        //client.send(microphone_reading);
         Serial.println(microphone_reading);
         lastUpdate = millis();
 
-        jitter = microphone.getLatest() > 500;
+
+        near = ultrasoundSensor.getValue() > PROXIMITY_THRESHOLD;
+        jitter = microphone.getLatest() > AUDIO_JITTER_THRESHOLD;
+
+        if(near) {
+            //here we need to send new message to client
+            //client.send();
+        }
     }
 }
 

@@ -22,3 +22,7 @@ String UltrasoundSensor::getJsonSerializedReadings() {
     serializeJson(doc, serializedDoc);
     return serializedDoc;
 }
+
+unsigned long UltrasoundSensor::getValue(){
+    return sensor.ping_cm();
+}
