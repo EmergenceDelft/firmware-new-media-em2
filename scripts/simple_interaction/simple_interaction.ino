@@ -12,7 +12,9 @@
 #define AMP_PIN 34
 
 #define ULTRASOUND_TRIGGER_ECHO_PIN 22
-#define ULTRASOUND_MIN_DISTANCE 100
+#define ULTRASOUND_MAX_DISTANCE 100
+#define ULTRASOUND_MIN_DISTANCE 2
+
 
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
@@ -27,6 +29,9 @@ void setup() {
 
   pwm.begin();
   pwm.setPWMFreq(50);  // This is the maximum PWM frequency
+
+  
+
 }
 
 int colorMotorAddress = 1;
@@ -47,7 +52,7 @@ void loop() {
   Serial.println(currenUltrasonicDistance);
 
 
-  if(currenUltrasonicDistance < ULTRASOUND_MIN_DISTANCE) {
+  if(currenUltrasonicDistance < ULTRASOUND_MAX_DISTANCE && currenUltrasonicDistance > ULTRASOUND_MIN_DISTANCE) {
     /* Flip transparency filter to active state. */
     pwm.setPWM(transparencyMotorAddress, 0, convertAngleToPulseWidth(transparencyMotorMinAngle));
     /* Adding a delay after measurement occurs gives more rest */
