@@ -17,24 +17,20 @@
 
 #define AUDIO_JITTER_THRESHOLD 500
 
-int colorMotorAddress = 1;
-int colorMotorSpeed = 5;
-int colorMotorMinAngle = 0;
-int colorMotorMaxAngle = 120;
-int colorMotorCurrentAngle = 0;
-int colorMotorSetupAngle = 60;
+int colourMotorAddress = 1;
+int colourMotorSpeed = 5;
+int colourMotorMinAngle = 0;
+int colourMotorMaxAngle = 100;
+int colourMotorCurrentAngle = 20;
+int colourMotorSetupAngle = 60;
+bool colourMotorIsMovingPositive = false;
 
 int transparencyMotorAddress = 0;
-int transparencyMotorMinAngle = 175;
-int transparecyMotorMaxAngle = 70;
+int transparencyMotorMinAngle = 90;
+int transparecyMotorMaxAngle = 175;
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 NewPing sensor(ULTRASOUND_TRIGGER_ECHO_PIN, ULTRASOUND_TRIGGER_ECHO_PIN);
-
-int generateRandomBetween(int a, int b) {
-    int random_integer = rand() % (b+1);
-    return random_integer + a;
-}
 
 void setup() {
     Serial.begin(115200);
@@ -45,9 +41,9 @@ void setup() {
     pwm.begin();
     pwm.setPWMFreq(50);  // This is the maximum PWM frequency
 
-  /* Initialize color motor at 60 degrees for 30 seconds to fix the color filter. */
-  pwm.setPWM(colorMotorAddress, 0, convertAngleToPulseWidth(colorMotorSetupAngle));
-  for(int i = 10; i > 0; i--) {
+  /* Initialize colour motor at 60 degrees for 30 seconds to fix the colour filter. */
+  pwm.setPWM(colourMotorAddress, 0, convertAngleToPulseWidth(colourMotorSetupAngle));
+  for(int i = 3; i > 0; i--) {
     Serial.print("Waiting for another ");
     Serial.print(i);
     Serial.println(" seconds.");
@@ -65,46 +61,55 @@ void loop() {
 
     if(currenUltrasonicDistance < ULTRASOUND_MAX_DISTANCE && currenUltrasonicDistance > ULTRASOUND_MIN_DISTANCE) {
         /* Flip transparency filter to active state. */
-        pwm.setPWM(transparencyMotorAddress, 0, convertAngleToPulseWidth(transparencyMotorMinAngle));
+        pwm.setPWM(transparencyMotorAddress, 0, convertAngleToPulseWidth(transparecyMotorMaxAngle));
         /* Adding a delay after measurement occurs gives more rest */
         delay(2000);
         return;
     }
 
     /* Flip transparency filter to inactive state. */
-    pwm.setPWM(transparencyMotorAddress, 0, convertAngleToPulseWidth(transparecyMotorMaxAngle));
+    pwm.setPWM(transparencyMotorAddress, 0, convertAngleToPulseWidth(transparencyMotorMinAngle));
 
     bool jitter = measureMicrophone() > AUDIO_JITTER_THRESHOLD;
   
-    if(colorMotorCurrentAngle >= colorMotorMaxAngle){
-        movingTowards180 = false;
+    if(colourMotorCurrentAngle >= colourMotorMaxAngle){
+        colourMotorIsMovingPositive = false;
     }
-    if(colorMotorCurrentAngle <= colorMotorMinAngle){
-        movingTowards180 = true;
+    if(colourMotorCurrentAngle <= colourMotorMinAngle){
+        colourMotorIsMovingPositive = true;
     }
 
     if(jitter) {
         int random_nr = generateRandomBetween(-2,5);
-        if(movingTowards180) {
-            increment = random_nr;
+        if(colourMotorIsMovingPositive) {
+            colourMotorSpeed = random_nr;
         }else {
-            increment = -random_nr;
+            colourMotorSpeed = -random_nr;
         }
     }else{
-        if(movingTowards180) {
-            increment = 1;
+        if(colourMotorIsMovingPositive) {
+            colourMotorSpeed = 3;
         }else {
-            increment = -1;
+            colourMotorSpeed = -3;
         } 
     }
-    colorMotorCurrentAngle += increment;
 
-    pwm.setPWM(colorMotorAddress, 0, convertAngleToPulseWidth(colorMotorCurrentAngle));
+    colourMotorCurrentAngle += colourMotorSpeed;
+    Serial.print("Colour filter turning to: ");
+    Serial.println(colourMotorCurrentAngle);
 
-
-    delay(100);
+    pwm.setPWM(colourMotorAddress, 0, convertAngleToPulseWidth(colourMotorCurrentAngle));
+    delay(50);
 }
 
+/*
+  Utility Functions
+*/
+
+int generateRandomBetween(int a, int b) {
+    int random_integer = rand() % (b+1);
+    return random_integer + a;
+}
 
 long convertAngleToPulseWidth(int motorAngle) {
   return map(motorAngle, 0, 180, SERVO_MIN_PULSE_WIDTH, SERVO_MAX_PULSE_WIDTH);
