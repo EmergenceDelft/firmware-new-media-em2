@@ -15,20 +15,26 @@
 #define ULTRASOUND_MAX_DISTANCE 100
 #define ULTRASOUND_MIN_DISTANCE 2
 
+#define AUDIO_JITTER_THRESHOLD 500
+
 
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 NewPing sensor(ULTRASOUND_TRIGGER_ECHO_PIN, ULTRASOUND_TRIGGER_ECHO_PIN);
 
+int generateRandomBetween(int a, int b) {
+    int random_integer = rand() % (b+1);
+    return random_integer + a;
+}
 
 void setup() {
-  Serial.begin(115200);
-  Serial.println("Begin");  
+    Serial.begin(115200);
+    Serial.println("Begin");  
     
-  Wire.begin(SDA_PIN, SCL_PIN);
+    Wire.begin(SDA_PIN, SCL_PIN);
 
-  pwm.begin();
-  pwm.setPWMFreq(50);  // This is the maximum PWM frequency
+    pwm.begin();
+    pwm.setPWMFreq(50);  // This is the maximum PWM frequency
 
   
 
@@ -44,38 +50,57 @@ int transparencyMotorAddress = 0;
 int transparencyMotorMinAngle = 0;
 int transparecyMotorMaxAngle = 90;
 
+bool movingTowards180;
+int increment;
+
 
 void loop() {
 
-  int currenUltrasonicDistance = sensor.ping_cm();
-  Serial.print("Current ultrasonic distance: ");
-  Serial.println(currenUltrasonicDistance);
+    int currenUltrasonicDistance = sensor.ping_cm();
+    Serial.print("Current ultrasonic distance: ");
+    Serial.println(currenUltrasonicDistance);
 
 
-  if(currenUltrasonicDistance < ULTRASOUND_MAX_DISTANCE && currenUltrasonicDistance > ULTRASOUND_MIN_DISTANCE) {
-    /* Flip transparency filter to active state. */
-    pwm.setPWM(transparencyMotorAddress, 0, convertAngleToPulseWidth(transparencyMotorMinAngle));
-    /* Adding a delay after measurement occurs gives more rest */
-    delay(2000);
-    return;
-  }
+    if(currenUltrasonicDistance < ULTRASOUND_MAX_DISTANCE && currenUltrasonicDistance > ULTRASOUND_MIN_DISTANCE) {
+        /* Flip transparency filter to active state. */
+        pwm.setPWM(transparencyMotorAddress, 0, convertAngleToPulseWidth(transparencyMotorMinAngle));
+        /* Adding a delay after measurement occurs gives more rest */
+        delay(2000);
+        return;
+    }
 
-  /* Flip transparency filter to inactive state. */
-  pwm.setPWM(transparencyMotorAddress, 0, convertAngleToPulseWidth(transparecyMotorMaxAngle));
+    /* Flip transparency filter to inactive state. */
+    pwm.setPWM(transparencyMotorAddress, 0, convertAngleToPulseWidth(transparecyMotorMaxAngle));
 
-  /* Handle color motor rotation */
-  if(colorMotorCurrentAngle >= colorMotorMaxAngle) {
-    colorMotorSpeed = -5;
-  }
-  if(colorMotorCurrentAngle <= colorMotorMinAngle) {
-    colorMotorSpeed = 5;
-  }
-  colorMotorCurrentAngle += colorMotorSpeed;
+    bool jitter = measureMicrophone() > AUDIO_JITTER_THRESHOLD;
+  
+    if(colorMotorCurrentAngle >= colorMotorMaxAngle){
+        movingTowards180 = false;
+    }
+    if(colorMotorCurrentAngle <= colorMotorMinAngle){
+        movingTowards180 = true;
+    }
 
-  pwm.setPWM(colorMotorAddress, 0, convertAngleToPulseWidth(colorMotorCurrentAngle));
+    if(jitter) {
+        int random_nr = generateRandomBetween(-2,5);
+        if(movingTowards180) {
+            increment = random_nr;
+        }else {
+            increment = -random_nr;
+        }
+    }else{
+        if(movingTowards180) {
+            increment = 1;
+        }else {
+            increment = -1;
+        } 
+    }
+    colorMotorCurrentAngle += increment;
+
+    pwm.setPWM(colorMotorAddress, 0, convertAngleToPulseWidth(colorMotorCurrentAngle));
 
 
-  delay(100);
+    delay(100);
 }
 
 
@@ -84,7 +109,7 @@ long convertAngleToPulseWidth(int motorAngle) {
 }
 
 int measureMicrophone() {
-    int micSamples = 100;
+    int micSamples = 10;
     int signalAvg = 0, signalMax = 0, signalMin = 50024;
     for (int i = 0; i < micSamples; i++)
     {
