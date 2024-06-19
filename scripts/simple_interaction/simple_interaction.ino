@@ -17,7 +17,16 @@
 
 #define AUDIO_JITTER_THRESHOLD 500
 
+int colorMotorAddress = 1;
+int colorMotorSpeed = 5;
+int colorMotorMinAngle = 0;
+int colorMotorMaxAngle = 120;
+int colorMotorCurrentAngle = 0;
+int colorMotorSetupAngle = 60;
 
+int transparencyMotorAddress = 0;
+int transparencyMotorMinAngle = 175;
+int transparecyMotorMaxAngle = 70;
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 NewPing sensor(ULTRASOUND_TRIGGER_ECHO_PIN, ULTRASOUND_TRIGGER_ECHO_PIN);
@@ -36,22 +45,15 @@ void setup() {
     pwm.begin();
     pwm.setPWMFreq(50);  // This is the maximum PWM frequency
 
-  
-
+  /* Initialize color motor at 60 degrees for 30 seconds to fix the color filter. */
+  pwm.setPWM(colorMotorAddress, 0, convertAngleToPulseWidth(colorMotorSetupAngle));
+  for(int i = 10; i > 0; i--) {
+    Serial.print("Waiting for another ");
+    Serial.print(i);
+    Serial.println(" seconds.");
+    delay(1000);
+  }
 }
-
-int colorMotorAddress = 1;
-int colorMotorSpeed = 5;
-int colorMotorMinAngle = 0;
-int colorMotorMaxAngle = 120;
-int colorMotorCurrentAngle = 0;
-
-int transparencyMotorAddress = 0;
-int transparencyMotorMinAngle = 0;
-int transparecyMotorMaxAngle = 90;
-
-bool movingTowards180;
-int increment;
 
 
 void loop() {
