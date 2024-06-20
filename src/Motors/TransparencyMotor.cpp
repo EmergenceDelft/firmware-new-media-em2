@@ -5,17 +5,29 @@
 TransparencyMotor::TransparencyMotor(int address, Adafruit_PWMServoDriver pwm, int interval)
     : Motor(address, pwm, interval) {}
 
+void TransparencyMotor::setActiveAngle(int x){
+    ACTIVE_ANGLE = x;
+}
+void TransparencyMotor::setInactiveAngle(int x){
+    INACTIVE_ANGLE = x;
+}
+void TransparencyMotor::setSnapIncrement(int x){
+    SNAP_INCREMENT = x;
+}
+
+
 void TransparencyMotor::update() {
-    if((millis() - _last_update) > _interval && _current_angle != _target_angle) {
+    if(_current_angle != _target_angle) {
+        int difference = _target_angle - _current_angle;
+        int increment;
         //set increment according to whether we need to increase or decrease current_angle
-        if(_current_angle < _target_angle){
-            _increment = 10;
-        }else{
-            _increment = -10;
+        if (difference > 0) {
+            increment = (difference < SNAP_INCREMENT) ? difference : SNAP_INCREMENT;
+        } else {
+            increment = (difference > -SNAP_INCREMENT) ? difference : -SNAP_INCREMENT;
         }
 
-        _last_update = millis();
-        _current_angle += _increment;
+        _current_angle += increment;
         setAngle(_current_angle);
 
     }

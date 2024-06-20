@@ -14,7 +14,6 @@ Motor::Motor(int address, Adafruit_PWMServoDriver pwm, int interval)
     _interval = interval; 
     _moving = true;
     _jitter = false;
-    _increment = 0;
     _last_update = 0; //time millis
     _current_angle = 0; //angle which should be proparly synced with the actual pwm angle
     _target_angle = 0;

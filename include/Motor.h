@@ -27,7 +27,6 @@ protected:
     bool _jitter;
     int _current_angle;
     int _target_angle;
-    int _increment;
     int _interval;
     bool _movingTowards180;
     unsigned long _last_update; // last update of position

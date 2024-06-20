@@ -75,6 +75,29 @@ void onMessageCallback(WebsocketsMessage message) {
         return;
     }
 
+    if(jsonMessage["type"] == "parameters"){
+        int i=0;
+        JsonArray voxelArray = jsonMessage["voxels"];
+        for (int i=0; i< voxelArray.size(); i++) {
+            JsonObject voxelObj = voxelArray[i];
+
+            JsonObject colorObj = voxelObj["colourMotor"];
+
+            voxels[i]->getColorMotor()->setMinAngle(colorObj["minAngle"]);
+            voxels[i]->getColorMotor()->setMaxAngle(colorObj["maxAngle"]);
+            voxels[i]->getColorMotor()->setRotationIncrement(colorObj["rotationIncrement"]);
+            voxels[i]->getColorMotor()->setSnapIncrement(colorObj["snapIncrement"]);
+            voxels[i]->getColorMotor()->setMinJitterIncrement(colorObj["minJitterIncrement"]);
+            voxels[i]->getColorMotor()->setMaxJitterIncrement(colorObj["maxJitterIncrement"]);
+
+            JsonObject transparencyObj = voxelObj["transparencyMotor"];
+
+            voxels[i]->getTransparencyMotor()->setActiveAngle(colorObj["activeAngle"]);
+            voxels[i]->getTransparencyMotor()->setInactiveAngle(colorObj["inactiveAngle"]);
+            voxels[i]->getTransparencyMotor()->setSnapIncrement(colorObj["snapIncrement"]);
+
+        }
+    }
 }
  
 void onEventsCallback(WebsocketsEvent event, String data) {
