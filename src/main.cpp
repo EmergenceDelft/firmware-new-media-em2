@@ -22,14 +22,22 @@ int numMotors = 4; //this should get updated onMessageCallback but have it as so
 int interval = 10; //default interval for updating motors
 unsigned long lastUpdate = 0;
 unsigned long lastUpdateClient = 0;
+unsigned long lastUpdateState = 0;
 bool jitter = true;
-bool near = false;
+bool proximityNear = false;
 
-int AUDIO_JITTER_THRESHOLD = 500;
-int PROXIMITY_THRESHOLD = 50;
 
-int ACTIVE_TRANSPARENCY_ANGLE = 0;
-int INACTIVE_TRANSPARENCY_ANGLE = 90;
+int MIN_AUDIO_JITTER_THRESHOLD = 500;
+int MAX_AUDIO_JITTER_THRESHOLD = 5000;
+
+int MIN_PROXIMITY_THRESHOLD = 1;
+int MAX_PROXIMITY_THRESHOLD = 100;
+
+int STATE_INTERVAL = 1000;
+
+// int ACTIVE_TRANSPARENCY_ANGLE = 0;
+// int INACTIVE_TRANSPARENCY_ANGLE = 90;
+
 
 String state;  
 
@@ -115,7 +123,7 @@ void setup() {
 
     client.onMessage(onMessageCallback);
     client.onEvent(onEventsCallback);
-    client.connect(CONNECTION_STRING);
+    client.connect(String(CONNECTION_STRING) + "?mac_address=" + WiFi.macAddress());
     
     /* Send hello message on connection. */
     client.send(getHelloMessage()); 
@@ -141,36 +149,10 @@ void setup() {
 }
 
 void updateSensors() {
-    if((millis() - lastUpdate) > SENSOR_INTERVAL) {
-        String sensor_reading = ultrasoundSensor.getJsonSerializedReadings();
-        //client.send(sensor_reading);
-        Serial.println(sensor_reading);
-        String microphone_reading = microphone.getJsonSerializedReadings();
-        //client.send(microphone_reading);
-        Serial.println(microphone_reading);
-        lastUpdate = millis();
 
-
-        near = ultrasoundSensor.getValue() < PROXIMITY_THRESHOLD;
-        jitter = microphone.getLatest() > AUDIO_JITTER_THRESHOLD;
-
-        if(near && currentState == UNMEASURED) {
-            currentState = MEASURED_OWN;
-            client.send(getJsonMeasured());
-
-            for(Voxel* v: voxels){
-                v->turnMotorsToMeasured();
-            }
-        }
-        if(!near && currentState == MEASURED_OWN) {
-            currentState = UNMEASURED;
-            client.send(getJsonUnmeasured());
-
-            for(Voxel* v: voxels){
-                v->turnMotorsToUnmeasured();
-            }
-        }
-    }
+    proximityNear = ultrasoundSensor.getValue() > MIN_PROXIMITY_THRESHOLD && ultrasoundSensor.getValue() < MAX_PROXIMITY_THRESHOLD;
+    Serial.println(microphone.getLatest());
+    jitter = microphone.getLatest() > MIN_AUDIO_JITTER_THRESHOLD && microphone.getLatest() < MAX_AUDIO_JITTER_THRESHOLD;
 }
 
 void updateClientConnection() {
@@ -181,33 +163,50 @@ void updateClientConnection() {
 }
 
 
+
 void loop() {
 
     switch (currentState) {
         case UNMEASURED:
             updateSensors();
-            updateClientConnection();
-            for(Voxel* v: voxels){
-                v->setJitter(jitter);
-                v->update();
+            if(proximityNear && (millis() - lastUpdateState) > STATE_INTERVAL) {
+                Serial.println(proximityNear);
+                Serial.println("going from UNMEASURED to MEASURED");
+                currentState = MEASURED_OWN;
+                String str = getJsonMeasured();
+
+                client.send(str);
+
+                for(Voxel* v: voxels){
+                    v->turnMotorsToMeasured();
+                }
+                lastUpdateState = millis();
             }
-            //
             break;
         case MEASURED_ENTANGLED:
-            updateClientConnection();
-            //update Motors here
             break;
         case MEASURED_OWN:
             updateSensors();
-            updateClientConnection();
-            for(Voxel* v: voxels){
-                v->setJitter(jitter);
-                v->update();
+            if(!proximityNear && (millis() - lastUpdateState) > STATE_INTERVAL) {
+                Serial.println(proximityNear);
+                Serial.println("going from MEASURED to UNMEASURED");
+                currentState = UNMEASURED;
+                client.send(getJsonUnmeasured());
+
+                for(Voxel* v: voxels){
+                    v->turnMotorsToUnmeasured();
+                }
+                lastUpdateState = millis();
             }
-            //
             break;
     }
+    updateClientConnection();
+    for(Voxel* v: voxels){
+        v->setJitter(jitter);
+        v->update();
+    }
 }
+
 
 
 String getJsonMeasured() {
@@ -229,4 +228,5 @@ String getJsonUnmeasured() {
     serializeJson(doc, serializedDoc);
     return serializedDoc;
 }
+
 

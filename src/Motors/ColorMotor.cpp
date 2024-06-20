@@ -23,7 +23,7 @@ void ColorMotor::moveContinously() {
         _movingTowards180 = true;
     }
     if(_jitter) {
-        int random_nr = generateRandomBetween(-2,5);
+        int random_nr = ColorMotor::generateRandomBetween(-2,5);
         if(_movingTowards180) {
             _increment = random_nr;
         }else {
@@ -59,7 +59,7 @@ void ColorMotor::moveToAngle() {
 
 
 
-int generateRandomBetween(int a, int b) {
+int ColorMotor::generateRandomBetween(int a, int b) {
     int random_integer = rand() % (b+1);
     return random_integer + a;
 }

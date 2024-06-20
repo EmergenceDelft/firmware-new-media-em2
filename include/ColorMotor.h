@@ -11,6 +11,7 @@ public:
 private:
     void moveContinously();
     void moveToAngle();
+    int generateRandomBetween(int a, int b);
 };
 
 #endif

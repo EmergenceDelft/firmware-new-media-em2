@@ -42,6 +42,9 @@ enum SensorType {
     CAPACITIVE
 };
 
+String getJsonMeasured();
+String getJsonUnmeasured();
+
 using namespace websockets;
 
 #endif
