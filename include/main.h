@@ -34,7 +34,7 @@
 /* Router credentials */
 #define SSID "NMPRouter"
 #define PASSWORD "keepitquantum"
-#define CONNECTION_STRING "ws://192.168.12.1:5050/echo" 
+#define CONNECTION_STRING "ws://192.168.12.1:5050/" 
 
 enum SensorType {
     ULTRASOUND,

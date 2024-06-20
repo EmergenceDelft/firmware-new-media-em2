@@ -27,7 +27,7 @@ bool colourMotorIsMovingPositive = false;
 
 int transparencyMotorAddress = 0;
 int transparencyMotorMinAngle = 90;
-int transparecyMotorMaxAngle = 175;
+int transparecyMotorMaxAngle = 195;
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 NewPing sensor(ULTRASOUND_TRIGGER_ECHO_PIN, ULTRASOUND_TRIGGER_ECHO_PIN);
