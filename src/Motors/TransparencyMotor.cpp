@@ -5,14 +5,29 @@
 TransparencyMotor::TransparencyMotor(int address, Adafruit_PWMServoDriver pwm, int interval)
     : Motor(address, pwm, interval) {}
 
-void TransparencyMotor::setActiveAngle(int x){
-    ACTIVE_ANGLE = x;
+void TransparencyMotor::setActiveAngle(int activeAngle){
+    Serial.print("Setting TransparencyMotor activeAngle to: ");
+    Serial.println(activeAngle);
+    ACTIVE_ANGLE = activeAngle;
 }
-void TransparencyMotor::setInactiveAngle(int x){
-    INACTIVE_ANGLE = x;
+
+int TransparencyMotor::getActiveAngle() {
+    return ACTIVE_ANGLE;
 }
-void TransparencyMotor::setSnapIncrement(int x){
-    SNAP_INCREMENT = x;
+
+int TransparencyMotor::getInactiveAngle() {
+    return INACTIVE_ANGLE;
+}
+
+void TransparencyMotor::setInactiveAngle(int inactiveAngle){
+    Serial.print("Setting TransparencyMotor inactiveAngle to: ");
+    Serial.println(inactiveAngle);
+    INACTIVE_ANGLE = inactiveAngle;
+}
+void TransparencyMotor::setSnapIncrement(int snapIncrement){
+    Serial.print("Setting TransparencyMotor snapIncrement to: ");
+    Serial.println(snapIncrement);
+    SNAP_INCREMENT = snapIncrement;
 }
 
 
@@ -37,3 +52,5 @@ int generateRandomBetween(int a, int b) {
     int random_integer = rand() % (b+1);
     return random_integer + a;
 }
+
+

@@ -5,24 +5,36 @@
 ColorMotor::ColorMotor(int address, Adafruit_PWMServoDriver pwm, int interval)
     : Motor(address, pwm, interval) {}
 
-void ColorMotor::setMinAngle(int x){
-    MIN_ANGLE = x;
+void ColorMotor::setMinAngle(int minAngle){
+    Serial.print("Setting ColorMotor min angle to: ");
+    Serial.println(minAngle);
+    MIN_ANGLE = minAngle;
 }
-void ColorMotor::setMaxAngle(int x){
-    MAX_ANGLE = x;
+void ColorMotor::setMaxAngle(int maxAngle){
+    Serial.print("Setting ColorMotor max angle to: ");
+    Serial.println(maxAngle);
+    MAX_ANGLE = maxAngle;
 }
 
-void ColorMotor::setRotationIncrement(int x){
-    ROTATION_INCREMENT = x;
+void ColorMotor::setRotationIncrement(int rotationIncrement){
+    Serial.print("Setting ColorMotor rotation increment to: ");
+    Serial.println(rotationIncrement);
+    ROTATION_INCREMENT = rotationIncrement;
 }
-void ColorMotor::setSnapIncrement(int x){
-    SNAP_INCREMENT = x;
+void ColorMotor::setSnapIncrement(int snapIncrement){
+    Serial.print("Setting ColorMotor snap increment to: ");
+    Serial.println(snapIncrement);
+    SNAP_INCREMENT = snapIncrement;
 }
-void ColorMotor::setMinJitterIncrement(int x){
-    MIN_JITTER_INCREMENT = x;
+void ColorMotor::setMinJitterIncrement(int minJitterIncrement){
+    Serial.print("Setting ColorMotor minJitterIncrement to: ");
+    Serial.println(minJitterIncrement);
+    MIN_JITTER_INCREMENT = minJitterIncrement;
 }
-void ColorMotor::setMaxJitterIncrement(int x){
-    MAX_JITTER_INCREMENT = x;
+void ColorMotor::setMaxJitterIncrement(int maxJitterIncrement){
+    Serial.print("Setting ColorMotor maxJitterIncrement to: ");
+    Serial.println(maxJitterIncrement);
+    MAX_JITTER_INCREMENT = maxJitterIncrement;
 }
 
 

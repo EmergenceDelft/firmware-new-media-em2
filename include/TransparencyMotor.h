@@ -9,7 +9,9 @@ public:
     TransparencyMotor(int address, Adafruit_PWMServoDriver pwm, int interval);
     void update() override;
     void setActiveAngle(int x);
+    int getActiveAngle();
     void setInactiveAngle(int x);
+    int getInactiveAngle();
     void setSnapIncrement(int x);
 private:
     int ACTIVE_ANGLE = 0;

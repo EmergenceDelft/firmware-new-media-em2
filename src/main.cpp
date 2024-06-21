@@ -82,7 +82,7 @@ void onMessageCallback(WebsocketsMessage message) {
         return;
     }
 
-    if(jsonMessage["type"] == "parameters"){
+    if(jsonMessage["type"] == "setup"){
         JsonObject content = jsonMessage["content"];
 
         MIN_PROXIMITY_THRESHOLD = content["minProximityThreshold"];
@@ -99,7 +99,6 @@ void onMessageCallback(WebsocketsMessage message) {
             JsonObject voxelObj = voxelArray[i];
 
             JsonObject colorObj = voxelObj["colourMotor"];
-
             voxels[i]->getColorMotor()->setMinAngle(colorObj["minAngle"]);
             voxels[i]->getColorMotor()->setMaxAngle(colorObj["maxAngle"]);
             voxels[i]->getColorMotor()->setRotationIncrement(colorObj["rotationIncrement"]);
@@ -109,11 +108,29 @@ void onMessageCallback(WebsocketsMessage message) {
 
             JsonObject transparencyObj = voxelObj["transparencyMotor"];
 
-            voxels[i]->getTransparencyMotor()->setActiveAngle(colorObj["activeAngle"]);
-            voxels[i]->getTransparencyMotor()->setInactiveAngle(colorObj["inactiveAngle"]);
-            voxels[i]->getTransparencyMotor()->setSnapIncrement(colorObj["snapIncrement"]);
+            voxels[i]->getTransparencyMotor()->setActiveAngle(transparencyObj["activeAngle"]);
+            voxels[i]->getTransparencyMotor()->setInactiveAngle(transparencyObj["inactiveAngle"]);
+            voxels[i]->getTransparencyMotor()->setSnapIncrement(transparencyObj["snapIncrement"]);
 
         }
+
+        Serial.print("MIN_PROXIMITY_THRESHOLD: ");
+        Serial.println(MIN_PROXIMITY_THRESHOLD);
+        Serial.print("MAX_PROXIMITY_THRESHOLD: ");
+        Serial.println(MAX_PROXIMITY_THRESHOLD);
+        Serial.print("MIN_AUDIO_JITTER_THRESHOLD: ");
+        Serial.println(MIN_AUDIO_JITTER_THRESHOLD);
+        Serial.print("MAX_AUDIO_JITTER_THRESHOLD: ");
+        Serial.println(MAX_AUDIO_JITTER_THRESHOLD);
+
+        Serial.print("PROXIMITY_SAMPLE_AMOUNT: ");
+        Serial.println(PROXIMITY_SAMPLE_AMOUNT);
+        Serial.print("PROXIMITY_SAMPLE_AMOUNT: ");
+        Serial.println(PROXIMITY_SAMPLE_INTERVAL);
+        Serial.print("AUDIO_SAMPLE_AMOUNT: ");
+        Serial.println(AUDIO_SAMPLE_AMOUNT);
+        Serial.print("AUDIO_SAMPLE_INTERVAL: ");
+        Serial.println(AUDIO_SAMPLE_INTERVAL);
     }
 }
 
