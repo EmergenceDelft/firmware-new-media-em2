@@ -15,14 +15,7 @@
 
 /* processing intervals  */
 #define BLOCKING_STATE_INTERVAL 2000
-int AUDIO_SAMPLE_INTERVAL = 500;
-int AUDIO_SAMPLE_AMOUNT = 100;
 
-/* Sensor tresholds*/
-int MIN_AUDIO_JITTER_THRESHOLD = 500;
-int MAX_AUDIO_JITTER_THRESHOLD = 5000;
-int MIN_PROXIMITY_THRESHOLD = 1;
-int MAX_PROXIMITY_THRESHOLD = 100;
 
 
 /* Ultrasound sensor  */
@@ -51,6 +44,7 @@ enum SensorType {
 
 String getJsonMeasured();
 String getJsonUnmeasured();
+String getHelloMessage();
 
 using namespace websockets;
 
