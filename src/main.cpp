@@ -24,11 +24,14 @@ unsigned long lastUpdate = 0;
 unsigned long lastUpdateClient = 0;
 unsigned long lastUpdateState = 0;
 unsigned long lastUpdateMicrophone = 0;
+unsigned long lastUpdateProximity = 0;
 bool jitter = true;
 bool proximityNear = false;
 
 int AUDIO_SAMPLE_INTERVAL = 500;
 int AUDIO_SAMPLE_AMOUNT = 100;
+int PROXIMITY_SAMPLE_INTERVAL = 300;
+int PROXIMITY_SAMPLE_AMOUNT = 10;
 
 /* Sensor tresholds*/
 int MIN_AUDIO_JITTER_THRESHOLD = 500;
@@ -78,6 +81,8 @@ void onMessageCallback(WebsocketsMessage message) {
         MAX_AUDIO_JITTER_THRESHOLD = jsonMessage["maxAudioJitterThreshold"];
         AUDIO_SAMPLE_AMOUNT = jsonMessage["audioSampleAmount"];
         AUDIO_SAMPLE_INTERVAL = jsonMessage["audioSampleInterval"];
+        PROXIMITY_SAMPLE_AMOUNT = jsonMessage["proximitySampleAmount"];
+        PROXIMITY_SAMPLE_INTERVAL = jsonMessage["proximitySampleInterval"];
 
         JsonArray voxelArray = jsonMessage["voxels"];
         for (int i=0; i< voxelArray.size(); i++) {
@@ -137,14 +142,19 @@ void setup() {
 
 void loop() {
 
-    unsigned long distance = ultrasoundSensor.getValue();
+    
     
     if(millis() - lastUpdateMicrophone > AUDIO_SAMPLE_INTERVAL) {
         int noise = microphone.measureAnalog(AUDIO_SAMPLE_AMOUNT);
         jitter = noise > MIN_AUDIO_JITTER_THRESHOLD && noise < MAX_AUDIO_JITTER_THRESHOLD;
         lastUpdateMicrophone = millis();
     }
-    proximityNear = distance > MIN_PROXIMITY_THRESHOLD && distance < MAX_PROXIMITY_THRESHOLD;
+
+    if(millis() - lastUpdateProximity > PROXIMITY_SAMPLE_INTERVAL) {
+        unsigned long distance = ultrasoundSensor.getValue();
+        proximityNear = distance > MIN_PROXIMITY_THRESHOLD && distance < MAX_PROXIMITY_THRESHOLD;
+    }
+    
 
     switch (currentState) {
         case UNMEASURED:
