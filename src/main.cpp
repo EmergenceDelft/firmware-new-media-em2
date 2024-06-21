@@ -25,6 +25,7 @@ unsigned long lastUpdateClient = 0;
 unsigned long lastUpdateState = 0;
 unsigned long lastUpdateMicrophone = 0;
 unsigned long lastUpdateProximity = 0;
+unsigned long lastUpdateMotors = 0;
 bool jitter = true;
 bool proximityNear = false;
 
@@ -32,6 +33,8 @@ int AUDIO_SAMPLE_INTERVAL = 500;
 int AUDIO_SAMPLE_AMOUNT = 100;
 int PROXIMITY_SAMPLE_INTERVAL = 300;
 int PROXIMITY_SAMPLE_AMOUNT = 10;
+
+int MOTOR_UPDATE_INTERVAL = 10;
 
 /* Sensor tresholds*/
 int MIN_AUDIO_JITTER_THRESHOLD = 500;
@@ -156,7 +159,7 @@ void loop() {
     if(millis() - lastUpdateProximity > PROXIMITY_SAMPLE_INTERVAL) {
         unsigned long distance = ultrasoundSensor.getValue();
         proximityNear = distance > MIN_PROXIMITY_THRESHOLD && distance < MAX_PROXIMITY_THRESHOLD;
-        
+        lastUpdateProximity = millis();
 
     }
     
@@ -194,9 +197,12 @@ void loop() {
 
     client.poll();
     /* In each loop update Motors. */
-    for(Voxel* v: voxels){
-        v->setJitter(jitter);
-        v->update();
+    if(millis() - lastUpdateMotors > MOTOR_UPDATE_INTERVAL){
+        for(Voxel* v: voxels){
+            v->setJitter(jitter);
+            v->update();
+        }
+        lastUpdateMotors = millis();
     }
 }
 
