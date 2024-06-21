@@ -10,19 +10,6 @@ UltrasoundSensor::UltrasoundSensor(String id, uint8_t triggerEchoPin)
     _id = id;
 }
 
-String UltrasoundSensor::getJsonSerializedReadings() {
-    JsonDocument doc;
-
-    doc["type"] = "sensor_reading";
-    doc["sensor_type"] = "ULTRASOUND";
-    doc["sensor_id"] = _id;
-    doc["value"] = sensor.ping_cm();
-
-    String serializedDoc;
-    serializeJson(doc, serializedDoc);
-    return serializedDoc;
-}
-
 unsigned long UltrasoundSensor::getValue(){
     return sensor.ping_cm();
 }

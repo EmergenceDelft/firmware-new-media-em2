@@ -11,38 +11,18 @@ Microphone::Microphone(String id, int AMP_PIN)
     _AMP_PIN = AMP_PIN;
 }
 
-String Microphone::getJsonSerializedReadings() {
-    JsonDocument doc;
-
-    float sensorValue = measureAnalog();
-    _latest = sensorValue;
-
-    doc["type"] = "sensor_reading";
-    doc["sensor_type"] = "MICROPHONE";
-    doc["sensor_id"] = _id;
-    doc["value"] = sensorValue;
-
-    String serializedDoc;
-
-    serializeJson(doc, serializedDoc);
-    return serializedDoc;
-}
-
-int Microphone::getLatest(){
-    return _latest;
-}
-
-int Microphone::measureAnalog()
+int Microphone::measureAnalog(int samples)
 {
-    int micSamples = 10;
-    int signalAvg = 0, signalMax = 0, signalMin = 65530;
-    for (int i = 0; i < micSamples; i++)
+    int signalAvg = 0, signalMax = 0, signalMin = 65530, k;
+    for (int i = 0; i < samples; i++)
     {
-        
-        int k = analogRead(_AMP_PIN);
-        signalMin = min(signalMin, k);
-        signalMax = max(signalMax, k);
-        signalAvg += k;
+        k = analogRead(_AMP_PIN);
+        if (k < signalMin){
+            signalMin = k;
+        }
+        if (k > signalMax){
+            signalMax = k;
+        }
     }
 
     return signalMax - signalMin;

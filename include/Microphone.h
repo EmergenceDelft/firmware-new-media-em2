@@ -12,7 +12,7 @@ class Microphone
 public:
   Microphone(String id, int AMP_PIN);
   String getJsonSerializedReadings();
-  int measureAnalog();
+  int measureAnalog(int samples);
   int getLatest();
 
 private:
