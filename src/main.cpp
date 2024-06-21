@@ -49,6 +49,7 @@ enum State {
 State currentState = UNMEASURED;
 
 void onMessageCallback(WebsocketsMessage message) {
+    Serial.println("hello");
 
     
     Serial.println(message.data());
@@ -58,6 +59,7 @@ void onMessageCallback(WebsocketsMessage message) {
 
 
     if(jsonMessage["type"] == "entangled_measure" && currentState == UNMEASURED) {
+        Serial.println("going from UNMEASURED to MEASURED_ENTANGLED");
         int angle = jsonMessage["angle"];
         for(Voxel* v: voxels){
             v->turnMotorsToMeasured(angle);
@@ -67,6 +69,7 @@ void onMessageCallback(WebsocketsMessage message) {
     }
 
     if (jsonMessage["type"] == "entangled_unmeasure" && currentState == MEASURED_ENTANGLED) {
+        Serial.println("going from MEASURED_ENTANGLED to UNMEASURED");
         for(Voxel* v: voxels){
             v->turnMotorsToUnmeasured();
         }
@@ -153,13 +156,14 @@ void loop() {
     if(millis() - lastUpdateProximity > PROXIMITY_SAMPLE_INTERVAL) {
         unsigned long distance = ultrasoundSensor.getValue();
         proximityNear = distance > MIN_PROXIMITY_THRESHOLD && distance < MAX_PROXIMITY_THRESHOLD;
+        
+
     }
     
 
     switch (currentState) {
         case UNMEASURED:
-            if(proximityNear && (millis() - lastUpdateState) > BLOCKING_STATE_INTERVAL) {
-                Serial.println("Current state: ");
+            if((millis() - lastUpdateState) > BLOCKING_STATE_INTERVAL && proximityNear) {
                 Serial.println("Going from UNMEASURED to MEASURED");
                 currentState = MEASURED_OWN;
                 String str = getJsonMeasured();
@@ -175,8 +179,7 @@ void loop() {
         case MEASURED_ENTANGLED:
             break;
         case MEASURED_OWN:
-            if(!proximityNear && (millis() - lastUpdateState) > BLOCKING_STATE_INTERVAL) {
-                Serial.println(proximityNear);
+            if((millis() - lastUpdateState) > BLOCKING_STATE_INTERVAL && !proximityNear) {
                 Serial.println("going from MEASURED to UNMEASURED");
                 currentState = UNMEASURED;
                 client.send(getJsonUnmeasured());
