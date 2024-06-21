@@ -61,7 +61,7 @@ void onMessageCallback(WebsocketsMessage message) {
 
 
 
-    if(jsonMessage["type"] == "entangled_measure" && currentState == UNMEASURED) {
+    if(jsonMessage["type"] == "entangled_measured" && currentState == UNMEASURED) {
         Serial.println("going from UNMEASURED to MEASURED_ENTANGLED");
         int angle = jsonMessage["angle"];
         for(Voxel* v: voxels){
@@ -71,7 +71,7 @@ void onMessageCallback(WebsocketsMessage message) {
         return;
     }
 
-    if (jsonMessage["type"] == "entangled_unmeasure" && currentState == MEASURED_ENTANGLED) {
+    if (jsonMessage["type"] == "entangled_unmeasured" && currentState == MEASURED_ENTANGLED) {
         Serial.println("going from MEASURED_ENTANGLED to UNMEASURED");
         for(Voxel* v: voxels){
             v->turnMotorsToUnmeasured();
