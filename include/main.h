@@ -14,8 +14,15 @@
 #include <Wire.h>
 
 /* processing intervals  */
-#define SENSOR_INTERVAL 1000
+#define BLOCKING_STATE_INTERVAL 2000
 #define CLIENT_INTERVAL 100
+
+/* Sensor tresholds*/
+#define MIN_AUDIO_JITTER_THRESHOLD  500
+#define MAX_AUDIO_JITTER_THRESHOLD  5000
+#define MIN_PROXIMITY_THRESHOLD  1
+#define MAX_PROXIMITY_THRESHOLD 100
+
 
 /* Ultrasound sensor  */
 #define ULTRASOUND_TRIGGER_ECHO_PIN 22
@@ -34,7 +41,7 @@
 /* Router credentials */
 #define SSID "NMPRouter"
 #define PASSWORD "keepitquantum"
-#define CONNECTION_STRING "ws://192.168.12.1:5050/" 
+#define CONNECTION_STRING "ws://192.168.12.241:5050/" 
 
 enum SensorType {
     ULTRASOUND,

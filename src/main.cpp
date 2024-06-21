@@ -27,20 +27,6 @@ bool jitter = true;
 bool proximityNear = false;
 
 
-int MIN_AUDIO_JITTER_THRESHOLD = 500;
-int MAX_AUDIO_JITTER_THRESHOLD = 5000;
-
-int MIN_PROXIMITY_THRESHOLD = 1;
-int MAX_PROXIMITY_THRESHOLD = 100;
-
-int STATE_INTERVAL = 1000;
-
-// int ACTIVE_TRANSPARENCY_ANGLE = 0;
-// int INACTIVE_TRANSPARENCY_ANGLE = 90;
-
-
-String state;  
-
 enum State {
     UNMEASURED,
     MEASURED_ENTANGLED,
@@ -99,55 +85,20 @@ void onMessageCallback(WebsocketsMessage message) {
         }
     }
 }
- 
-void onEventsCallback(WebsocketsEvent event, String data) {
-    if(event == WebsocketsEvent::ConnectionOpened) {
-        Serial.println("Connection Opened");
-    } else if(event == WebsocketsEvent::ConnectionClosed) {
-        Serial.println("Connection Closed");
-    } else if(event == WebsocketsEvent::GotPing) {
-        Serial.println("Got a Ping!");
-    } else if(event == WebsocketsEvent::GotPong) {
-        Serial.println("Got a Pong!");
-    }
-}
-
-String getHelloMessage() {
-    JsonDocument doc;
-
-    doc["type"] = "hello";
-    doc["mac_address"] = WiFi.macAddress();
-
-    JsonDocument arrayDoc;
-    JsonArray sensorArray = arrayDoc.to<JsonArray>();
-
-    sensorArray.add("ULTRASOUND");
-    sensorArray.add("MICROPHONE");
-
-    doc["sensors"] = sensorArray;
-
-    String serializedDoc;
-    serializeJson(doc, serializedDoc);
-    return serializedDoc;
-}
-
 
 void setup() {
     Serial.begin(115200);
-
 
     WiFi.begin(SSID, PASSWORD);
     for(int i = 0; i < 10 && WiFi.status() != WL_CONNECTED; i++) {
         Serial.print(".");
         delay(1000);
     }
-    
     Serial.println("Connected to wifi");
 
     client.onMessage(onMessageCallback);
-    client.onEvent(onEventsCallback);
     client.connect(String(CONNECTION_STRING) + "?mac_address=" + WiFi.macAddress());
-    
+
     /* Send hello message on connection. */
     client.send(getHelloMessage()); 
     delay(2000);
@@ -156,11 +107,8 @@ void setup() {
     Wire.begin(SDA_PIN, SCL_PIN);
     pwm.begin();
     pwm.setPWMFreq(SERVO_PWM_FREQUENCY);
-    Serial.println("done with pwm");
-
 
     voxels.reserve(numVoxels);
-
     for(int i=0; i < numVoxels; i++) {
         ColorMotor* motor1 = new ColorMotor(2*i, pwm, interval);
         TransparencyMotor* motor2 = new TransparencyMotor(2*i+1, pwm, interval);
@@ -171,30 +119,15 @@ void setup() {
     currentState = UNMEASURED;
 }
 
-void updateSensors() {
-
-    proximityNear = ultrasoundSensor.getValue() > MIN_PROXIMITY_THRESHOLD && ultrasoundSensor.getValue() < MAX_PROXIMITY_THRESHOLD;
-    Serial.println(microphone.getLatest());
-    jitter = microphone.getLatest() > MIN_AUDIO_JITTER_THRESHOLD && microphone.getLatest() < MAX_AUDIO_JITTER_THRESHOLD;
-}
-
-void updateClientConnection() {
-    if((millis() - lastUpdateClient) > CLIENT_INTERVAL){
-        client.poll();
-        lastUpdateClient = millis();
-    }
-}
-
-
-
 void loop() {
+    proximityNear = ultrasoundSensor.getValue() > MIN_PROXIMITY_THRESHOLD && ultrasoundSensor.getValue() < MAX_PROXIMITY_THRESHOLD;
+    jitter = microphone.getLatest() > MIN_AUDIO_JITTER_THRESHOLD && microphone.getLatest() < MAX_AUDIO_JITTER_THRESHOLD;
 
     switch (currentState) {
         case UNMEASURED:
-            updateSensors();
-            if(proximityNear && (millis() - lastUpdateState) > STATE_INTERVAL) {
-                Serial.println(proximityNear);
-                Serial.println("going from UNMEASURED to MEASURED");
+            if(proximityNear && (millis() - lastUpdateState) > BLOCKING_STATE_INTERVAL) {
+                Serial.println("Current state: ");
+                Serial.println("Going from UNMEASURED to MEASURED");
                 currentState = MEASURED_OWN;
                 String str = getJsonMeasured();
 
@@ -209,8 +142,7 @@ void loop() {
         case MEASURED_ENTANGLED:
             break;
         case MEASURED_OWN:
-            updateSensors();
-            if(!proximityNear && (millis() - lastUpdateState) > STATE_INTERVAL) {
+            if(!proximityNear && (millis() - lastUpdateState) > BLOCKING_STATE_INTERVAL) {
                 Serial.println(proximityNear);
                 Serial.println("going from MEASURED to UNMEASURED");
                 currentState = UNMEASURED;
@@ -223,7 +155,9 @@ void loop() {
             }
             break;
     }
-    updateClientConnection();
+
+    client.poll();
+    /* In each loop update Motors. */
     for(Voxel* v: voxels){
         v->setJitter(jitter);
         v->update();
@@ -231,25 +165,48 @@ void loop() {
 }
 
 
+/*
+    Message utility functions.
+*/
 
 String getJsonMeasured() {
     JsonDocument doc;
 
     doc["type"] = "measured";
-    doc["angle"] = voxels[0]->getColorMotor()->getAngle();
+    doc["macAddress"] = WiFi.macAddress();
+    doc["currentColourAngle"] = voxels[0]->getColorMotor()->getAngle();
 
     String serializedDoc;
     serializeJson(doc, serializedDoc);
     return serializedDoc;
 }
+
 String getJsonUnmeasured() {
     JsonDocument doc;
 
     doc["type"] = "unmeasured";
+    doc["macAddress"] = WiFi.macAddress();
     
     String serializedDoc;
     serializeJson(doc, serializedDoc);
     return serializedDoc;
 }
 
+String getHelloMessage() {
+    JsonDocument doc;
 
+    doc["type"] = "hello";
+    doc["macAddress"] = WiFi.macAddress();
+
+    JsonDocument arrayDoc;
+    JsonArray sensorArray = arrayDoc.to<JsonArray>();
+
+    sensorArray.add("ULTRASOUND");
+    sensorArray.add("MICROPHONE");
+
+    doc["sensors"] = sensorArray;
+
+    String serializedDoc;
+    serializeJson(doc, serializedDoc);
+    return serializedDoc;
+}
