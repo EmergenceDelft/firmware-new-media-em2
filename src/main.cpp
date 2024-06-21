@@ -63,7 +63,9 @@ void onMessageCallback(WebsocketsMessage message) {
 
     if(jsonMessage["type"] == "entangled_measured" && currentState == UNMEASURED) {
         Serial.println("going from UNMEASURED to MEASURED_ENTANGLED");
-        int angle = jsonMessage["angle"];
+        JsonObject content = jsonMessage["content"];
+        int angle = content["currentColourAngle"];
+        Serial.println(angle);
         for(Voxel* v: voxels){
             v->turnMotorsToMeasured(angle);
         }
@@ -81,16 +83,18 @@ void onMessageCallback(WebsocketsMessage message) {
     }
 
     if(jsonMessage["type"] == "parameters"){
-        MIN_PROXIMITY_THRESHOLD = jsonMessage["minProximityThreshold"];
-        MAX_PROXIMITY_THRESHOLD = jsonMessage["maxProximityThreshold"];
-        MIN_AUDIO_JITTER_THRESHOLD = jsonMessage["minAudioJitterThreshold"];
-        MAX_AUDIO_JITTER_THRESHOLD = jsonMessage["maxAudioJitterThreshold"];
-        AUDIO_SAMPLE_AMOUNT = jsonMessage["audioSampleAmount"];
-        AUDIO_SAMPLE_INTERVAL = jsonMessage["audioSampleInterval"];
-        PROXIMITY_SAMPLE_AMOUNT = jsonMessage["proximitySampleAmount"];
-        PROXIMITY_SAMPLE_INTERVAL = jsonMessage["proximitySampleInterval"];
+        JsonObject content = jsonMessage["content"];
 
-        JsonArray voxelArray = jsonMessage["voxels"];
+        MIN_PROXIMITY_THRESHOLD = content["minProximityThreshold"];
+        MAX_PROXIMITY_THRESHOLD = content["maxProximityThreshold"];
+        MIN_AUDIO_JITTER_THRESHOLD = content["minAudioJitterThreshold"];
+        MAX_AUDIO_JITTER_THRESHOLD = content["maxAudioJitterThreshold"];
+        AUDIO_SAMPLE_AMOUNT = content["audioSampleAmount"];
+        AUDIO_SAMPLE_INTERVAL = content["audioSampleInterval"];
+        PROXIMITY_SAMPLE_AMOUNT = content["proximitySampleAmount"];
+        PROXIMITY_SAMPLE_INTERVAL = content["proximitySampleInterval"];
+
+        JsonArray voxelArray = content["voxels"];
         for (int i=0; i< voxelArray.size(); i++) {
             JsonObject voxelObj = voxelArray[i];
 
