@@ -141,8 +141,8 @@ void setup() {
 
     voxels.reserve(numVoxels);
     for(int i=0; i < numVoxels; i++) {
-        ColorMotor* motor1 = new ColorMotor(2*i, pwm, interval);
-        TransparencyMotor* motor2 = new TransparencyMotor(2*i+1, pwm, interval);
+        TransparencyMotor* motor2 = new TransparencyMotor(i+1, pwm, interval);
+        ColorMotor* motor1 = new ColorMotor(2*i + 1, pwm, interval);
         Voxel* v = new Voxel(motor1, motor2);
         voxels.push_back(v);
     }
