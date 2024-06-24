@@ -24,7 +24,6 @@ TransparencyMotor* Voxel::getTransparencyMotor() {
 void Voxel::turnMotorsToUnmeasured(){
     colorMotor.setMovement(true); //this is for color to stop moving on next update
     transparencyMotor.setTargetAngle(transparencyMotor.getInactiveAngle());
-
 }
 void Voxel::turnMotorsToMeasured(){
     
@@ -36,7 +35,7 @@ void Voxel::turnMotorsToMeasured(){
 void Voxel::turnMotorsToMeasured(int angle){
     colorMotor.setMovement(false); //this is for color to stop moving on next update
     colorMotor.setTargetAngle(angle); //this is only for color to go to this angle
-    transparencyMotor.setTargetAngle(transparencyMotor.getActiveAngle())
+    transparencyMotor.setTargetAngle(transparencyMotor.getActiveAngle());
 }
 
 void Voxel::setJitter(bool jitter){
