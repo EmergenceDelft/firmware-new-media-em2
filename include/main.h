@@ -16,6 +16,8 @@
 /* processing intervals  */
 #define BLOCKING_STATE_INTERVAL 2000
 
+#define COLOR_SETUP_START_ANGLE 60
+
 
 
 /* Ultrasound sensor  */

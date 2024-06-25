@@ -15,10 +15,8 @@ public:
     void setSnapIncrement(int x);
 private:
     int ACTIVE_ANGLE = 0;
-    int INACTIVE_ANGLE = 180;
+    int INACTIVE_ANGLE = 90;
     int SNAP_INCREMENT = 10;
-
-
 };
 
 #endif

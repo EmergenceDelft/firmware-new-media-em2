@@ -122,15 +122,15 @@ void onMessageCallback(WebsocketsMessage message) {
         Serial.println(MIN_AUDIO_JITTER_THRESHOLD);
         Serial.print("MAX_AUDIO_JITTER_THRESHOLD: ");
         Serial.println(MAX_AUDIO_JITTER_THRESHOLD);
-
-        Serial.print("PROXIMITY_SAMPLE_AMOUNT: ");
-        Serial.println(PROXIMITY_SAMPLE_AMOUNT);
-        Serial.print("PROXIMITY_SAMPLE_AMOUNT: ");
-        Serial.println(PROXIMITY_SAMPLE_INTERVAL);
+        
         Serial.print("AUDIO_SAMPLE_AMOUNT: ");
         Serial.println(AUDIO_SAMPLE_AMOUNT);
         Serial.print("AUDIO_SAMPLE_INTERVAL: ");
         Serial.println(AUDIO_SAMPLE_INTERVAL);
+        Serial.print("PROXIMITY_SAMPLE_AMOUNT: ");
+        Serial.println(PROXIMITY_SAMPLE_AMOUNT);
+        Serial.print("PROXIMITY_SAMPLE_AMOUNT: ");
+        Serial.println(PROXIMITY_SAMPLE_INTERVAL);
     }
 }
 
@@ -148,8 +148,7 @@ void setup() {
     client.connect(String(CONNECTION_STRING) + "?mac_address=" + WiFi.macAddress());
 
     /* Send hello message on connection. */
-    client.send(getHelloMessage()); 
-    delay(2000);
+    client.send(getHelloMessage());
 
     /* Set the I2C pins to the pins configured for the custom hardware */
     Wire.begin(SDA_PIN, SCL_PIN);
@@ -161,10 +160,14 @@ void setup() {
         TransparencyMotor* motor2 = new TransparencyMotor(2*i, pwm, interval);
         ColorMotor* motor1 = new ColorMotor(2*i + 1, pwm, interval);
         Voxel* v = new Voxel(motor1, motor2);
+        v->turnMotorsToMeasured(COLOR_SETUP_START_ANGLE);
         voxels.push_back(v);
     }
-
+    delay(10000);
     currentState = UNMEASURED;
+    for(Voxel* v: voxels){
+        v->turnMotorsToUnmeasured();
+    }
 }
 
 void loop() {
