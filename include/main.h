@@ -30,6 +30,10 @@
 #define SCL_PIN 14
 #define SDA_PIN 27
 #define SERVO_PWM_FREQUENCY 50.0f
+
+//IDEA: better determine the pulse width 
+//this is the range where the servo actually works, if outside this range the servo does not move
+//you can determine this by testing the servos independently, going in steps of 10 or 25 to see when it's working and when not
 #define SERVO_MIN_PULSE_WIDTH 100 
 #define SERVO_MAX_PULSE_WIDTH 525 
 

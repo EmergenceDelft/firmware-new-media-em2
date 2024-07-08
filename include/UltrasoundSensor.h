@@ -10,7 +10,6 @@ class UltrasoundSensor
 {
 public:
   UltrasoundSensor(String id, uint8_t triggerEchoPin);
-  String getJsonSerializedReadings();
   unsigned long getValue();
 
 private:

@@ -11,9 +11,10 @@ class Microphone
 {
 public:
   Microphone(String id, int AMP_PIN);
-  String getJsonSerializedReadings();
+
+  //number of samples, 
+  //the larger this number the longer the microphone blocks everything but the more accurate it is
   int measureAnalog(int samples);
-  int getLatest();
 
 private:
   String _id;

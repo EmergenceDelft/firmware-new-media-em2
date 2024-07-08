@@ -36,6 +36,8 @@ void TransparencyMotor::update() {
         int difference = _target_angle - _current_angle;
         int increment;
         //set increment according to whether we need to increase or decrease current_angle
+        //also if the difference is smaller than the snap increment, then go directly to the target_angle
+        //this prevents bouncing back and forth due to over and under shooting
         if (difference > 0) {
             increment = (difference < SNAP_INCREMENT) ? difference : SNAP_INCREMENT;
         } else {
@@ -45,6 +47,10 @@ void TransparencyMotor::update() {
         _current_angle += increment;
         setAngle(_current_angle);
         if(_current_angle == _target_angle){
+            //this is how we prevented mechanical issue where it was very unstable at the end
+            //a little delay and setting the motor to 0 so it stops working
+            //maybe not the smartest fix but smart enough
+            delay(50);
             _pwm.setPWM(_address, 0, 0);
         }
 

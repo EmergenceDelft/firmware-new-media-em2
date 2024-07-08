@@ -15,11 +15,9 @@ Motor::Motor(int address, Adafruit_PWMServoDriver pwm, int interval)
     _moving = true;
     _jitter = false;
     _last_update = 0; //time millis
-    _current_angle = 0; //angle which should be proparly synced with the actual pwm angle
-    _target_angle = 0;
+    _current_angle = 0; //angle which *should* be properly synced with the actual pwm angle
+    _target_angle = 0;  //where we'd like to go, this is updated from the json server message
     _movingTowards180 = true;
-     //where we'd like to go, this is updated from the json server message
-     //how many angles at a time to increase (careful if more than 1)
 }
 
 int Motor::getAngle() {
