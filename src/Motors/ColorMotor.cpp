@@ -41,6 +41,7 @@ void ColorMotor::setMaxJitterIncrement(int maxJitterIncrement){
 
 void ColorMotor::update() {
     if(millis() - _last_update > _interval){
+        //color motor either moves continuosly or moves to a specific angle and stops
         if(_moving) {
             ColorMotor::moveContinously();
         }else{
@@ -50,6 +51,7 @@ void ColorMotor::update() {
 }
 
 void ColorMotor::moveContinously() {
+    //named moving towards 180 because that was the original max angle
     if(_current_angle >= MAX_ANGLE){
         _movingTowards180 = false;
     }
@@ -57,6 +59,7 @@ void ColorMotor::moveContinously() {
         _movingTowards180 = true;
     }
     int increment;
+    //maybe a little bit ugly if elses, you could move the moving towards 180 if else outside?
     if(_jitter) {
         int random_nr = ColorMotor::generateRandomBetween(MIN_JITTER_INCREMENT,MAX_JITTER_INCREMENT);
         if(_movingTowards180) {
@@ -82,6 +85,7 @@ void ColorMotor::moveToAngle() {
         int difference = _target_angle - _current_angle;
         int increment;
         //set increment according to whether we need to increase or decrease current_angle
+        //when difference is small enough than go directly to where we need to go, prevent overshooting target
         if (difference > 0) {
             increment = (difference < SNAP_INCREMENT) ? difference : SNAP_INCREMENT;
         } else {

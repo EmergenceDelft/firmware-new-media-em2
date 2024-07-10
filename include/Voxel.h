@@ -6,6 +6,7 @@
 
 class Voxel {
 private:
+    //every voxel owns 2 motors
     ColorMotor colorMotor;
     TransparencyMotor transparencyMotor;
 
