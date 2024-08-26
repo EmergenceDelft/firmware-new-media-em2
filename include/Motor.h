@@ -30,7 +30,7 @@ protected:
     int _interval;
 
     //determines if the motor is moving towards the left or the right
-    //TODO: this only applies to the ColorMotor, it should be moved there
+    //TODO: this only applies to the ColourMotor, it should be moved there
     bool _movingTowards180;
     unsigned long _last_update; // last update of position, this is for timing
     

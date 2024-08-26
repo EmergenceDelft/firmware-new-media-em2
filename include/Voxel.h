@@ -1,23 +1,23 @@
 #ifndef VOXEL_H
 #define VOXEL_H
 
-#include "ColorMotor.h"
+#include "ColourMotor.h"
 #include "TransparencyMotor.h"
 
 class Voxel {
 private:
     //every voxel owns 2 motors
-    ColorMotor colorMotor;
+    ColourMotor colourMotor;
     TransparencyMotor transparencyMotor;
 
 public:
-    Voxel(ColorMotor* colorMotor, TransparencyMotor* transparencyMotor);
+    Voxel(ColourMotor* colourMotor, TransparencyMotor* transparencyMotor);
 
     // Update both motors
     void update();
 
     // Getters for motors
-    ColorMotor* getColorMotor();
+    ColourMotor* getColourMotor();
     TransparencyMotor* getTransparencyMotor();
 
     void turnMotorsToUnmeasured();

@@ -1,56 +1,56 @@
-// ColorMotor.cpp
-#include "ColorMotor.h"
+// ColourMotor.cpp
+#include "ColourMotor.h"
 #include "Motor.h"
 
-ColorMotor::ColorMotor(int address, Adafruit_PWMServoDriver pwm, int interval)
+ColourMotor::ColourMotor(int address, Adafruit_PWMServoDriver pwm, int interval)
     : Motor(address, pwm, interval) {}
 
-void ColorMotor::setMinAngle(int minAngle){
+void ColourMotor::setMinAngle(int minAngle){
     MIN_ANGLE = minAngle;
-    Serial.print("Setting ColorMotor min angle to: ");
+    Serial.print("Setting ColourMotor min angle to: ");
     Serial.println(MIN_ANGLE);
 }
-void ColorMotor::setMaxAngle(int maxAngle){
+void ColourMotor::setMaxAngle(int maxAngle){
     MAX_ANGLE = maxAngle;
-    Serial.print("Setting ColorMotor max angle to: ");
+    Serial.print("Setting ColourMotor max angle to: ");
     Serial.println(MAX_ANGLE);
 }
 
-void ColorMotor::setRotationIncrement(int rotationIncrement){
+void ColourMotor::setRotationIncrement(int rotationIncrement){
     ROTATION_INCREMENT = rotationIncrement;
-    Serial.print("Setting ColorMotor rotation increment to: ");
+    Serial.print("Setting ColourMotor rotation increment to: ");
     Serial.println(ROTATION_INCREMENT);
 }
-void ColorMotor::setSnapIncrement(int snapIncrement){
+void ColourMotor::setSnapIncrement(int snapIncrement){
     SNAP_INCREMENT = snapIncrement;
-    Serial.print("Setting ColorMotor snap increment to: ");
+    Serial.print("Setting ColourMotor snap increment to: ");
     Serial.println(SNAP_INCREMENT);
 }
-void ColorMotor::setMinJitterIncrement(int minJitterIncrement){
+void ColourMotor::setMinJitterIncrement(int minJitterIncrement){
     MIN_JITTER_INCREMENT = minJitterIncrement;
-    Serial.print("Setting ColorMotor minJitterIncrement to: ");
+    Serial.print("Setting ColourMotor minJitterIncrement to: ");
     Serial.println(MIN_JITTER_INCREMENT);
 }
-void ColorMotor::setMaxJitterIncrement(int maxJitterIncrement){
+void ColourMotor::setMaxJitterIncrement(int maxJitterIncrement){
     MAX_JITTER_INCREMENT = maxJitterIncrement;
-    Serial.print("Setting ColorMotor maxJitterIncrement to: ");
+    Serial.print("Setting ColourMotor maxJitterIncrement to: ");
     Serial.println(MAX_JITTER_INCREMENT);
 }
 
 
 
-void ColorMotor::update() {
+void ColourMotor::update() {
     if(millis() - _last_update > _interval){
-        //color motor either moves continuosly or moves to a specific angle and stops
+        //colour motor either moves continuosly or moves to a specific angle and stops
         if(_moving) {
-            ColorMotor::moveContinously();
+            ColourMotor::moveContinuously();
         }else{
-            ColorMotor::moveToAngle();
+            ColourMotor::moveToAngle();
         }
     }
 }
 
-void ColorMotor::moveContinously() {
+void ColourMotor::moveContinuously() {
     //named moving towards 180 because that was the original max angle
     if(_current_angle >= MAX_ANGLE){
         _movingTowards180 = false;
@@ -61,7 +61,7 @@ void ColorMotor::moveContinously() {
     int increment;
     //maybe a little bit ugly if elses, you could move the moving towards 180 if else outside?
     if(_jitter) {
-        int random_nr = ColorMotor::generateRandomBetween(MIN_JITTER_INCREMENT,MAX_JITTER_INCREMENT);
+        int random_nr = ColourMotor::generateRandomBetween(MIN_JITTER_INCREMENT,MAX_JITTER_INCREMENT);
         if(_movingTowards180) {
             increment = random_nr;
         }else {
@@ -79,7 +79,7 @@ void ColorMotor::moveContinously() {
 
 }
 
-void ColorMotor::moveToAngle() {
+void ColourMotor::moveToAngle() {
     if(_current_angle != _target_angle) {
 
         int difference = _target_angle - _current_angle;
@@ -99,7 +99,7 @@ void ColorMotor::moveToAngle() {
 
 
 
-int ColorMotor::generateRandomBetween(int a, int b) {
+int ColourMotor::generateRandomBetween(int a, int b) {
     int random_integer = rand() % (b+1);
     return random_integer + a;
 }
