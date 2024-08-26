@@ -13,13 +13,7 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <Wire.h>
 
-/* processing intervals  */
-#define BLOCKING_STATE_INTERVAL 2000
-
 #define COLOUR_SETUP_START_ANGLE 60
-
-
-
 /* Ultrasound sensor  */
 #define ULTRASOUND_TRIGGER_ECHO_PIN 22
 
@@ -38,9 +32,9 @@
 #define SERVO_MAX_PULSE_WIDTH 525 
 
 /* Router credentials */
-#define SSID "NMPRouter"
+#define SSID "NMPRouter 2.0"
 #define PASSWORD "keepitquantum"
-#define CONNECTION_STRING "ws://192.168.12.1:5050/" 
+#define CONNECTION_STRING "ws://192.168.0.101:5050/" 
 
 enum SensorType {
     ULTRASOUND,

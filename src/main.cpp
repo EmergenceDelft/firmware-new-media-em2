@@ -45,6 +45,9 @@ int PROXIMITY_SAMPLE_INTERVAL = 100;
 int PROXIMITY_SAMPLE_AMOUNT = 10;
 
 int MOTOR_UPDATE_INTERVAL = 20;
+int UNMEASURED_BLOCKING_STATE_INTERVAL = 2000;
+int MEASURED_BLOCKING_STATE_INTERVAL = 2000;
+
 
 /* Sensor tresholds*/
 int MIN_AUDIO_JITTER_THRESHOLD = 200;
@@ -53,7 +56,7 @@ int MIN_PROXIMITY_THRESHOLD = 1;
 int MAX_PROXIMITY_THRESHOLD = 150;
 
 /* Transparency motor jitter */
-int TRANSPARENCY_MOTOR_JITTER = true;
+bool TRANSPARENCY_MOTOR_JITTER = true;
 
 
 //three states the ESP can be in
@@ -117,6 +120,9 @@ void onMessageCallback(WebsocketsMessage message) {
         PROXIMITY_SAMPLE_AMOUNT = content["proximitySampleAmount"];
         PROXIMITY_SAMPLE_INTERVAL = content["proximitySampleInterval"];
         TRANSPARENCY_MOTOR_JITTER = content["transparencyMotorJitter"];
+        UNMEASURED_BLOCKING_STATE_INTERVAL = content["unmeasuredBlockingStateInterval"];
+        MEASURED_BLOCKING_STATE_INTERVAL = content["measuredBlockingStateInterval"];
+
 
         JsonArray voxelArray = content["voxels"];
 
@@ -160,6 +166,12 @@ void onMessageCallback(WebsocketsMessage message) {
         Serial.println(PROXIMITY_SAMPLE_AMOUNT);
         Serial.print("PROXIMITY_SAMPLE_AMOUNT: ");
         Serial.println(PROXIMITY_SAMPLE_INTERVAL);
+        Serial.print("TRANSPARENCY_MOTOR_JITTER: ");
+        Serial.println(TRANSPARENCY_MOTOR_JITTER);        
+        Serial.print("UNMEASURED_BLOCKING_STATE_INTERVAL: ");
+        Serial.println(UNMEASURED_BLOCKING_STATE_INTERVAL);
+        Serial.print("MEASURED_BLOCKING_STATE_INTERVAL: ");
+        Serial.println(MEASURED_BLOCKING_STATE_INTERVAL);
     }
 }
 
@@ -243,7 +255,7 @@ void loop() {
             //When the device is unmeasured and the JITTER_TRANSPARENCY_FILTER_IS_SET
             //Make sure the transparency filter jitters
 
-            if((millis() - lastUpdateState) > BLOCKING_STATE_INTERVAL && proximityNear) {
+            if((millis() - lastUpdateState) > UNMEASURED_BLOCKING_STATE_INTERVAL && proximityNear) {
                 Serial.println("Going from UNMEASURED to MEASURED");
                 currentState = MEASURED_OWN;
 
@@ -263,7 +275,7 @@ void loop() {
             //doing nothing, just waiting for message from server to go from measured entangled to unmeasured
             break;
         case MEASURED_OWN:
-            if((millis() - lastUpdateState) > BLOCKING_STATE_INTERVAL && !proximityNear) {
+            if((millis() - lastUpdateState) > MEASURED_BLOCKING_STATE_INTERVAL && !proximityNear) {
                 Serial.println("going from MEASURED to UNMEASURED");
                 currentState = UNMEASURED;
 
