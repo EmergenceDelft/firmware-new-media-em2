@@ -24,7 +24,9 @@ public:
     void turnMotorsToMeasured();
     void turnMotorsToMeasured(int angle);
 
-    void setJitter(bool jitter);
+    void setColourMotorJitter(bool jitter);
+    void setTransparencyMotorJitter(bool jitter);
 };
 
 #endif // VOXEL_H
+ 

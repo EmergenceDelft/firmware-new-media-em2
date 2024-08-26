@@ -33,7 +33,7 @@ unsigned long lastUpdateMicrophone = 0;
 unsigned long lastUpdateProximity = 0;
 unsigned long lastUpdateMotors = 0;
 
-bool jitter = true;
+bool colourMotorJitter = true;
 bool proximityNear = false;
 
 
@@ -51,6 +51,10 @@ int MIN_AUDIO_JITTER_THRESHOLD = 200;
 int MAX_AUDIO_JITTER_THRESHOLD = 5000;
 int MIN_PROXIMITY_THRESHOLD = 1;
 int MAX_PROXIMITY_THRESHOLD = 150;
+
+/* Transparency motor jitter */
+int TRANSPARENCY_MOTOR_JITTER = true;
+
 
 //three states the ESP can be in
 //measured own means someone is activating the proximity sensor
@@ -112,6 +116,7 @@ void onMessageCallback(WebsocketsMessage message) {
         AUDIO_SAMPLE_INTERVAL = content["audioSampleInterval"];
         PROXIMITY_SAMPLE_AMOUNT = content["proximitySampleAmount"];
         PROXIMITY_SAMPLE_INTERVAL = content["proximitySampleInterval"];
+        TRANSPARENCY_MOTOR_JITTER = content["transparencyMotorJitter"];
 
         JsonArray voxelArray = content["voxels"];
 
@@ -214,7 +219,7 @@ void loop() {
         //this is blocking, don't make the AUDIO_SAMPLE_AMOUNT too big
         int noise = microphone.measureAnalog(AUDIO_SAMPLE_AMOUNT);
         //basic way to determine if the movement should be jittery or not, advanced way would be to scale it linearly or something
-        jitter = noise > MIN_AUDIO_JITTER_THRESHOLD && noise < MAX_AUDIO_JITTER_THRESHOLD;
+        colourMotorJitter = noise > MIN_AUDIO_JITTER_THRESHOLD && noise < MAX_AUDIO_JITTER_THRESHOLD;
         lastUpdateMicrophone = millis();
     }
 
@@ -248,6 +253,7 @@ void loop() {
                 client.send(str);
 
                 for(Voxel* v: voxels){
+                    v->setTransparencyMotorJitter(false);
                     v->turnMotorsToMeasured();
                 }
                 lastUpdateState = millis();
@@ -265,6 +271,7 @@ void loop() {
                 client.send(getJsonUnmeasured());
 
                 for(Voxel* v: voxels){
+                    v->setTransparencyMotorJitter(TRANSPARENCY_MOTOR_JITTER);
                     v->turnMotorsToUnmeasured();
                 }
                 lastUpdateState = millis();
@@ -277,9 +284,7 @@ void loop() {
     /* In each loop update Motors. */
     if(millis() - lastUpdateMotors > MOTOR_UPDATE_INTERVAL){
         for(Voxel* v: voxels){
-            v->setColourJitter(colourJitter);
-            v->setTransparencyJitter()
-
+            v->setColourMotorJitter(colourMotorJitter);
             //IMPORTANT
             //this updates all motors, they will all move by a set amount of steps to where they need to
             //if this is not called or called too rarely you will notice

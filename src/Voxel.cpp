@@ -39,6 +39,10 @@ void Voxel::turnMotorsToMeasured(int angle){
     transparencyMotor.setTargetAngle(transparencyMotor.getActiveAngle());
 }
 
-void Voxel::setJitter(bool jitter){
+void Voxel::setColourMotorJitter(bool jitter){
     colourMotor.setJitter(jitter);
+}
+
+void Voxel::setTransparencyMotorJitter(bool jitter){
+    transparencyMotor.setJitter(jitter);
 }
