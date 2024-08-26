@@ -58,7 +58,7 @@ This repository contains the firmware for the hardware modules of the Emergence 
 - **To connect Raspberry Pi to LAN and have internet access, pull from the server repo/develop:**  
   - Connect to NMPRouter
  
-  - `ssh nmprouter@192.168.12.1`
+  - `ssh nmprouter@192.168.12.1` (password admin)
  
   - **Check if the server is running:** 
 
