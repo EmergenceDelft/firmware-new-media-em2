@@ -2,12 +2,23 @@
 #include <ArduinoWebsockets.h>
 #include <WiFi.h>
 #include <ArduinoJson.h>
+
 WebsocketsClient client;
+
+#define BUTTON_PIN 22
+
+int BUTTON_DELAY = 5000;
+
 
 void onMessageCallback(WebsocketsMessage message) {
     Serial.println("hello");
 
     Serial.println(message.data()); 
+
+    if(jsonMessage["type"] == "setup"){
+        JsonObject content = jsonMessage["content"];
+        BUTTON_DELAY = content["buttonDelay"];
+    }
 }
 
 void setup() {
@@ -28,10 +39,17 @@ void setup() {
 
     /* Send hello message on connection. */
     client.send(getHelloMessage());
+
+    
+    pinMode(BUTTON_PIN, INPUT);
 }
 
 void loop() {
-
+  if(digitalRead(BUTTON_PIN)) {
+    String str = getJsonButtonPressed();
+    client.send(str);
+  }
+  delay(BUTTON_DELAY)
 }
 
 
@@ -52,6 +70,17 @@ String getHelloMessage() {
 
     //but then you'd have to somehow query your existing sensor or reflash it if you have different sensorArrays
     doc["sensors"] = sensorArray;
+
+    String serializedDoc;
+    serializeJson(doc, serializedDoc);
+    return serializedDoc;
+}
+
+String getJsonButtonPressed() {
+    JsonDocument doc;
+
+    doc["type"] = "button_pressed";
+    doc["macAddress"] = WiFi.macAddress();
 
     String serializedDoc;
     serializeJson(doc, serializedDoc);
