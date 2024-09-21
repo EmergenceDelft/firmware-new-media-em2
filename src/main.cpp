@@ -65,7 +65,8 @@ bool TRANSPARENCY_MOTOR_JITTER = true;
 enum State {
     UNMEASURED,
     MEASURED_ENTANGLED,
-    MEASURED_OWN
+    MEASURED_OWN,
+    JITTER
 };
 
 State currentState = UNMEASURED;
@@ -79,8 +80,8 @@ void onMessageCallback(WebsocketsMessage message) {
     deserializeJson(jsonMessage, message.data());
 
     //when receiving entangled measured message, snap colour motor to the angle of the entangled colour motor
-    if(jsonMessage["type"] == "entangled_measured" && currentState == UNMEASURED) {
-        Serial.println("going from UNMEASURED to MEASURED_ENTANGLED");
+    if(jsonMessage["type"] == "entangled_measured" && currentState == JITTER) {
+        Serial.println("going from " + String(currentState) + " to MEASURED_ENTANGLED");
         JsonObject content = jsonMessage["content"];
         int angle = content["currentColourAngle"];
         Serial.println(angle);
@@ -88,6 +89,7 @@ void onMessageCallback(WebsocketsMessage message) {
         //IDEA with more voxels, one can do more interesting things
         for(Voxel* v: voxels){
             v->turnMotorsToMeasured(angle);
+            v->setTransparencyMotorJitter(false);
         }
 
         //switch state to measured entangled, only way to go out of this state is an unmeasure entangled message
@@ -102,6 +104,16 @@ void onMessageCallback(WebsocketsMessage message) {
             v->turnMotorsToUnmeasured();
         }
         currentState = UNMEASURED;
+        return;
+    }
+
+    if (jsonMessage["type"] == "button_pressed") {
+        Serial.println("going from " + String(currentState) + " to JITTER");
+        for(Voxel* v: voxels){
+            v->turnMotorsToJitter();
+            v->setTransparencyMotorJitter(true);
+        }
+        currentState = JITTER;
         return;
     }
 
@@ -250,6 +262,23 @@ void loop() {
     
 
     switch (currentState) {
+        case JITTER:
+            if((millis() - lastUpdateState) > UNMEASURED_BLOCKING_STATE_INTERVAL && proximityNear) {
+                Serial.println("Going from JITTER to MEASURED_OWN");
+                currentState = MEASURED_OWN;
+
+                //send to server own colour angle, so that server can send to all entangled esps which angle to go to
+                String str = getJsonMeasured();
+
+                client.send(str);
+
+                for(Voxel* v: voxels){
+                    v->setTransparencyMotorJitter(false);
+                    v->turnMotorsToMeasured();
+                }
+                lastUpdateState = millis();
+            }
+            break;
         case UNMEASURED:
 
             //When the device is unmeasured and the JITTER_TRANSPARENCY_FILTER_IS_SET
@@ -276,14 +305,14 @@ void loop() {
             break;
         case MEASURED_OWN:
             if((millis() - lastUpdateState) > MEASURED_BLOCKING_STATE_INTERVAL && !proximityNear) {
-                Serial.println("going from MEASURED to UNMEASURED");
+                Serial.println("going from MEASURED_OWN to UNMEASURED");
                 currentState = UNMEASURED;
 
                 //send server unmeasure message, so it can notify all entangled ESPs to go to unmeasured too
                 client.send(getJsonUnmeasured());
 
                 for(Voxel* v: voxels){
-                    v->setTransparencyMotorJitter(TRANSPARENCY_MOTOR_JITTER);
+                    v->setTransparencyMotorJitter(false);
                     v->turnMotorsToUnmeasured();
                 }
                 lastUpdateState = millis();
