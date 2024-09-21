@@ -50,7 +50,7 @@ void TransparencyMotor::update() {
             //this is how we prevented mechanical issue where it was very unstable at the end
             //a little delay and setting the motor to 0 so it stops working
             //maybe not the smartest fix but smart enough
-            delay(50);
+            delay(10);
             _pwm.setPWM(_address, 0, 0);
             if(_jitter) {
                 _current_angle -= increment;

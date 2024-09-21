@@ -23,6 +23,7 @@ public:
     void turnMotorsToUnmeasured();
     void turnMotorsToMeasured();
     void turnMotorsToMeasured(int angle);
+    void turnMotorsToJitter();
 
     void setColourMotorJitter(bool jitter);
     void setTransparencyMotorJitter(bool jitter);
