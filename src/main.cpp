@@ -1,7 +1,7 @@
 #include <main.h>
 #include <UltrasoundSensor.h>
 #include <Motor.h>
-#include <ColorMotor.h>
+#include <ColourMotor.h>
 #include <TransparencyMotor.h>
 #include <Voxel.h>
 #include <Microphone.h>
@@ -33,7 +33,7 @@ unsigned long lastUpdateMicrophone = 0;
 unsigned long lastUpdateProximity = 0;
 unsigned long lastUpdateMotors = 0;
 
-bool jitter = true;
+bool colourMotorJitter = true;
 bool proximityNear = false;
 
 
@@ -45,12 +45,19 @@ int PROXIMITY_SAMPLE_INTERVAL = 100;
 int PROXIMITY_SAMPLE_AMOUNT = 10;
 
 int MOTOR_UPDATE_INTERVAL = 20;
+int UNMEASURED_BLOCKING_STATE_INTERVAL = 2000;
+int MEASURED_BLOCKING_STATE_INTERVAL = 2000;
+
 
 /* Sensor tresholds*/
 int MIN_AUDIO_JITTER_THRESHOLD = 200;
 int MAX_AUDIO_JITTER_THRESHOLD = 5000;
 int MIN_PROXIMITY_THRESHOLD = 1;
 int MAX_PROXIMITY_THRESHOLD = 150;
+
+/* Transparency motor jitter */
+bool TRANSPARENCY_MOTOR_JITTER = true;
+
 
 //three states the ESP can be in
 //measured own means someone is activating the proximity sensor
@@ -71,7 +78,7 @@ void onMessageCallback(WebsocketsMessage message) {
     JsonDocument jsonMessage;
     deserializeJson(jsonMessage, message.data());
 
-    //when receiving entangled measured message, snap color motor to the angle of the entangled color motor
+    //when receiving entangled measured message, snap colour motor to the angle of the entangled colour motor
     if(jsonMessage["type"] == "entangled_measured" && currentState == UNMEASURED) {
         Serial.println("going from UNMEASURED to MEASURED_ENTANGLED");
         JsonObject content = jsonMessage["content"];
@@ -112,6 +119,10 @@ void onMessageCallback(WebsocketsMessage message) {
         AUDIO_SAMPLE_INTERVAL = content["audioSampleInterval"];
         PROXIMITY_SAMPLE_AMOUNT = content["proximitySampleAmount"];
         PROXIMITY_SAMPLE_INTERVAL = content["proximitySampleInterval"];
+        TRANSPARENCY_MOTOR_JITTER = content["transparencyMotorJitter"];
+        UNMEASURED_BLOCKING_STATE_INTERVAL = content["unmeasuredBlockingStateInterval"];
+        MEASURED_BLOCKING_STATE_INTERVAL = content["measuredBlockingStateInterval"];
+
 
         JsonArray voxelArray = content["voxels"];
 
@@ -120,14 +131,14 @@ void onMessageCallback(WebsocketsMessage message) {
             JsonObject voxelObj = voxelArray[i];
 
             //british english to american english
-            JsonObject colorObj = voxelObj["colourMotor"];
+            JsonObject colourObj = voxelObj["colourMotor"];
 
-            voxels[i]->getColorMotor()->setMinAngle(colorObj["minAngle"]);
-            voxels[i]->getColorMotor()->setMaxAngle(colorObj["maxAngle"]);
-            voxels[i]->getColorMotor()->setRotationIncrement(colorObj["rotationIncrement"]);
-            voxels[i]->getColorMotor()->setSnapIncrement(colorObj["snapIncrement"]);
-            voxels[i]->getColorMotor()->setMinJitterIncrement(colorObj["minJitterIncrement"]);
-            voxels[i]->getColorMotor()->setMaxJitterIncrement(colorObj["maxJitterIncrement"]);
+            voxels[i]->getColourMotor()->setMinAngle(colourObj["minAngle"]);
+            voxels[i]->getColourMotor()->setMaxAngle(colourObj["maxAngle"]);
+            voxels[i]->getColourMotor()->setRotationIncrement(colourObj["rotationIncrement"]);
+            voxels[i]->getColourMotor()->setSnapIncrement(colourObj["snapIncrement"]);
+            voxels[i]->getColourMotor()->setMinJitterIncrement(colourObj["minJitterIncrement"]);
+            voxels[i]->getColourMotor()->setMaxJitterIncrement(colourObj["maxJitterIncrement"]);
 
             JsonObject transparencyObj = voxelObj["transparencyMotor"];
 
@@ -155,6 +166,12 @@ void onMessageCallback(WebsocketsMessage message) {
         Serial.println(PROXIMITY_SAMPLE_AMOUNT);
         Serial.print("PROXIMITY_SAMPLE_AMOUNT: ");
         Serial.println(PROXIMITY_SAMPLE_INTERVAL);
+        Serial.print("TRANSPARENCY_MOTOR_JITTER: ");
+        Serial.println(TRANSPARENCY_MOTOR_JITTER);        
+        Serial.print("UNMEASURED_BLOCKING_STATE_INTERVAL: ");
+        Serial.println(UNMEASURED_BLOCKING_STATE_INTERVAL);
+        Serial.print("MEASURED_BLOCKING_STATE_INTERVAL: ");
+        Serial.println(MEASURED_BLOCKING_STATE_INTERVAL);
     }
 }
 
@@ -184,10 +201,10 @@ void setup() {
     voxels.reserve(numVoxels);
     for(int i=0; i < numVoxels; i++) {
         TransparencyMotor* motor2 = new TransparencyMotor(2*i, pwm, interval);
-        ColorMotor* motor1 = new ColorMotor(2*i + 1, pwm, interval);
+        ColourMotor* motor1 = new ColourMotor(2*i + 1, pwm, interval);
 
         //IMPORTANT!!!!
-        //for aligning color motor in the back, we want to set it to the center of its virtual position
+        //for aligning colour motor in the back, we want to set it to the center of its virtual position
         //and then align the physical gear (so that it is in the middle)
         motor1->setAngle(60);
         Voxel* v = new Voxel(motor1, motor2);
@@ -195,8 +212,8 @@ void setup() {
     }
 
     //IMPORTANT
-    //huge delay so that one is able to align the color motor as described previously
-    //one can screw in the gear rod into the color motor in these 10 seconds
+    //huge delay so that one is able to align the colour motor as described previously
+    //one can screw in the gear rod into the colour motor in these 10 seconds
     //easier way is to turn off the power after the gear went to the middle in the previous step
     //then screw it in while making sure that you are not moving the motor
     delay(10000);
@@ -214,7 +231,7 @@ void loop() {
         //this is blocking, don't make the AUDIO_SAMPLE_AMOUNT too big
         int noise = microphone.measureAnalog(AUDIO_SAMPLE_AMOUNT);
         //basic way to determine if the movement should be jittery or not, advanced way would be to scale it linearly or something
-        jitter = noise > MIN_AUDIO_JITTER_THRESHOLD && noise < MAX_AUDIO_JITTER_THRESHOLD;
+        colourMotorJitter = noise > MIN_AUDIO_JITTER_THRESHOLD && noise < MAX_AUDIO_JITTER_THRESHOLD;
         lastUpdateMicrophone = millis();
     }
 
@@ -234,16 +251,21 @@ void loop() {
 
     switch (currentState) {
         case UNMEASURED:
-            if((millis() - lastUpdateState) > BLOCKING_STATE_INTERVAL && proximityNear) {
+
+            //When the device is unmeasured and the JITTER_TRANSPARENCY_FILTER_IS_SET
+            //Make sure the transparency filter jitters
+
+            if((millis() - lastUpdateState) > UNMEASURED_BLOCKING_STATE_INTERVAL && proximityNear) {
                 Serial.println("Going from UNMEASURED to MEASURED");
                 currentState = MEASURED_OWN;
 
-                //send to server own color angle, so that server can send to all entangled esps which angle to go to
+                //send to server own colour angle, so that server can send to all entangled esps which angle to go to
                 String str = getJsonMeasured();
 
                 client.send(str);
 
                 for(Voxel* v: voxels){
+                    v->setTransparencyMotorJitter(false);
                     v->turnMotorsToMeasured();
                 }
                 lastUpdateState = millis();
@@ -253,7 +275,7 @@ void loop() {
             //doing nothing, just waiting for message from server to go from measured entangled to unmeasured
             break;
         case MEASURED_OWN:
-            if((millis() - lastUpdateState) > BLOCKING_STATE_INTERVAL && !proximityNear) {
+            if((millis() - lastUpdateState) > MEASURED_BLOCKING_STATE_INTERVAL && !proximityNear) {
                 Serial.println("going from MEASURED to UNMEASURED");
                 currentState = UNMEASURED;
 
@@ -261,6 +283,7 @@ void loop() {
                 client.send(getJsonUnmeasured());
 
                 for(Voxel* v: voxels){
+                    v->setTransparencyMotorJitter(TRANSPARENCY_MOTOR_JITTER);
                     v->turnMotorsToUnmeasured();
                 }
                 lastUpdateState = millis();
@@ -273,8 +296,7 @@ void loop() {
     /* In each loop update Motors. */
     if(millis() - lastUpdateMotors > MOTOR_UPDATE_INTERVAL){
         for(Voxel* v: voxels){
-            v->setJitter(jitter);
-
+            v->setColourMotorJitter(colourMotorJitter);
             //IMPORTANT
             //this updates all motors, they will all move by a set amount of steps to where they need to
             //if this is not called or called too rarely you will notice
@@ -294,9 +316,9 @@ String getJsonMeasured() {
 
     doc["type"] = "measured";
     doc["macAddress"] = WiFi.macAddress();
-    //for communicating current angle to entangled esps, we only get the angle from the first voxel color motor
+    //for communicating current angle to entangled esps, we only get the angle from the first voxel colour motor
     //IDEA send different angles, not just the first one. have different voxels entangled with other voxels
-    doc["currentColourAngle"] = voxels[0]->getColorMotor()->getAngle();
+    doc["currentColourAngle"] = voxels[0]->getColourMotor()->getAngle();
 
     String serializedDoc;
     serializeJson(doc, serializedDoc);

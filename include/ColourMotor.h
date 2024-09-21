@@ -1,12 +1,12 @@
-// ColorMotor.h
-#ifndef COLORMOTOR_H
-#define COLORMOTOR_H
+// ColourMotor.h
+#ifndef COLOURMOTOR_H
+#define COLOURMOTOR_H
 
 #include "Motor.h"
 
-class ColorMotor : public Motor {
+class ColourMotor : public Motor {
 public:
-    ColorMotor(int address, Adafruit_PWMServoDriver pwm, int interval);
+    ColourMotor(int address, Adafruit_PWMServoDriver pwm, int interval);
     void setMinAngle(int x);
     void setMaxAngle(int x);
     void setRotationIncrement(int x);
@@ -15,7 +15,7 @@ public:
     void setMaxJitterIncrement(int x);
     void update() override;
 private:
-    //angles for calibrating color filter, you have to put some values and see if the filter is straight or not
+    //angles for calibrating colour filter, you have to put some values and see if the filter is straight or not
     //depending the straightness of the real filter, adjust values
     int MIN_ANGLE = 0;
     int MAX_ANGLE = 90;
@@ -33,7 +33,7 @@ private:
 
     //how fast to move when collapsing/measuring filter
     int SNAP_INCREMENT = 10;
-    void moveContinously();
+    void moveContinuously();
     void moveToAngle();
     int generateRandomBetween(int a, int b);
 };

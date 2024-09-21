@@ -52,6 +52,10 @@ void TransparencyMotor::update() {
             //maybe not the smartest fix but smart enough
             delay(50);
             _pwm.setPWM(_address, 0, 0);
+            if(_jitter) {
+                _current_angle -= increment;
+                setAngle(_current_angle);
+            }
         }
 
     }
