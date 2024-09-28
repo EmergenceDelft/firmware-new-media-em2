@@ -33,6 +33,9 @@ unsigned long lastUpdateMicrophone = 0;
 unsigned long lastUpdateProximity = 0;
 unsigned long lastUpdateMotors = 0;
 
+long distanceReal[3];
+long distanceFilter[3];
+
 bool colourMotorJitter = true;
 bool proximityNear = false;
 
@@ -71,6 +74,24 @@ enum State {
 
 State currentState = UNMEASURED;
 
+long LPF (long input){
+ // float timestamp = _micros();
+    if(input > 450){
+        input = 450;
+    }
+  distanceReal[0] = input;
+   float b[] = {0.06745527, 0.13491054, 0.06745527};
+    float a[] = {1.14298050, -0.41280160};
+  distanceFilter[0] = a[0]*distanceFilter[1] + a[1]*distanceFilter[2] + b[0]*distanceReal[0] + b[1]*distanceReal[1] + b[2]*distanceReal[2];
+
+  for(int i = 1; i >= 0; i--){
+    distanceReal[i+1] = distanceReal[i]; // store xi
+    distanceFilter[i+1] = distanceFilter[i]; // store yi
+  }
+  Serial.println(distanceFilter[0]);
+  return distanceFilter[0];
+}
+
 void onMessageCallback(WebsocketsMessage message) {
     Serial.println("hello");
 
@@ -107,7 +128,7 @@ void onMessageCallback(WebsocketsMessage message) {
         return;
     }
 
-    if (jsonMessage["type"] == "button_pressed") {
+    if (jsonMessage["type"] == "button_pressed" && currentState == UNMEASURED) {
         Serial.println("going from " + String(currentState) + " to JITTER");
         for(Voxel* v: voxels){
             v->turnMotorsToJitter();
@@ -218,7 +239,7 @@ void setup() {
         //IMPORTANT!!!!
         //for aligning colour motor in the back, we want to set it to the center of its virtual position
         //and then align the physical gear (so that it is in the middle)
-        motor1->setAngle(60);
+        motor1->setAngle(90);
         Voxel* v = new Voxel(motor1, motor2);
         voxels.push_back(v);
     }
@@ -254,8 +275,9 @@ void loop() {
         //keep in mind that if the ultrasoundSensor does not detect something in its MAX_RANGE (450 i think)
         //the returned distance is 0
         //IMPORTANT filter out the 0 values so that it's properly understood as out of range and not 0 cm away
-        unsigned long distance = ultrasoundSensor.getValue();
+        unsigned long distance = LPF(ultrasoundSensor.getValue());
         proximityNear = distance > MIN_PROXIMITY_THRESHOLD && distance < MAX_PROXIMITY_THRESHOLD;
+        
         lastUpdateProximity = millis();
 
     }
