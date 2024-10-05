@@ -10,6 +10,6 @@ UltrasoundSensor::UltrasoundSensor(String id, uint8_t triggerEchoPin)
     _id = id;
 }
 
-unsigned long UltrasoundSensor::getValue(){
-    return sensor.ping_cm();
+unsigned long UltrasoundSensor::getValue(int pings){
+    return sensor.ping_median(pings, 450);
 }

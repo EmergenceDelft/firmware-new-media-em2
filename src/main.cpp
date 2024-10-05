@@ -275,7 +275,10 @@ void loop() {
         //keep in mind that if the ultrasoundSensor does not detect something in its MAX_RANGE (450 i think)
         //the returned distance is 0
         //IMPORTANT filter out the 0 values so that it's properly understood as out of range and not 0 cm away
-        unsigned long distance = LPF(ultrasoundSensor.getValue());
+        long distance = ultrasoundSensor.getValue(10)/57;
+        Serial.println(distance);
+        // long filtered_dist = LPF(real_dist);
+        // unsigned long distance = LPF(ultrasoundSensor.getValue());
         proximityNear = distance > MIN_PROXIMITY_THRESHOLD && distance < MAX_PROXIMITY_THRESHOLD;
         
         lastUpdateProximity = millis();
