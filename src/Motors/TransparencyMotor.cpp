@@ -34,6 +34,9 @@ int TransparencyMotor::getInactiveAngle() {
 void TransparencyMotor::update() {
     if(_current_angle != _target_angle) {
         int difference = _target_angle - _current_angle;
+        //current = 83
+        //target = 90
+        //differentce 7
         int increment;
         //set increment according to whether we need to increase or decrease current_angle
         //also if the difference is smaller than the snap increment, then go directly to the target_angle
@@ -50,8 +53,9 @@ void TransparencyMotor::update() {
             //this is how we prevented mechanical issue where it was very unstable at the end
             //a little delay and setting the motor to 0 so it stops working
             //maybe not the smartest fix but smart enough
-            delay(10);
+            delay(25);
             _pwm.setPWM(_address, 0, 0);
+            delay(25);
             if(_jitter) {
                 _current_angle -= increment;
                 setAngle(_current_angle);

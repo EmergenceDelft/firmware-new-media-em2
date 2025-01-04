@@ -5,6 +5,7 @@
 #include <TransparencyMotor.h>
 #include <Voxel.h>
 #include <Microphone.h>
+#include <MedianFilter.h>
 #include <cmath> 
 
 WebsocketsClient client;
@@ -36,6 +37,8 @@ unsigned long lastUpdateMotors = 0;
 long distanceReal[3];
 long distanceFilter[3];
 
+
+
 bool colourMotorJitter = true;
 bool proximityNear = false;
 
@@ -44,22 +47,24 @@ bool proximityNear = false;
 //IMPORTANT the higher the sample amount/lower the sample interval, the more the program is blocking (no motor movement, no sensing)
 int AUDIO_SAMPLE_INTERVAL = 500;
 int AUDIO_SAMPLE_AMOUNT = 100;
-int PROXIMITY_SAMPLE_INTERVAL = 100;
+int PROXIMITY_SAMPLE_INTERVAL = 1000;
 int PROXIMITY_SAMPLE_AMOUNT = 10;
 
 int MOTOR_UPDATE_INTERVAL = 20;
-int UNMEASURED_BLOCKING_STATE_INTERVAL = 2000;
-int MEASURED_BLOCKING_STATE_INTERVAL = 2000;
+int UNMEASURED_BLOCKING_STATE_INTERVAL = 1000;
+int MEASURED_BLOCKING_STATE_INTERVAL = 1000;
 
 
 /* Sensor tresholds*/
 int MIN_AUDIO_JITTER_THRESHOLD = 200;
 int MAX_AUDIO_JITTER_THRESHOLD = 5000;
-int MIN_PROXIMITY_THRESHOLD = 1;
-int MAX_PROXIMITY_THRESHOLD = 150;
+int MIN_PROXIMITY_THRESHOLD = 10;
+int MAX_PROXIMITY_THRESHOLD = 100;
 
 /* Transparency motor jitter */
 bool TRANSPARENCY_MOTOR_JITTER = true;
+
+MedianFilter* medFilter = new MedianFilter(PROXIMITY_SAMPLE_AMOUNT, 0UL);
 
 
 //three states the ESP can be in
@@ -76,8 +81,8 @@ State currentState = UNMEASURED;
 
 long LPF (long input){
  // float timestamp = _micros();
-    if(input > 450){
-        input = 450;
+    if(input > 120){
+        input = 120;
     }
   distanceReal[0] = input;
    float b[] = {0.06745527, 0.13491054, 0.06745527};
@@ -88,7 +93,6 @@ long LPF (long input){
     distanceReal[i+1] = distanceReal[i]; // store xi
     distanceFilter[i+1] = distanceFilter[i]; // store yi
   }
-  Serial.println(distanceFilter[0]);
   return distanceFilter[0];
 }
 
@@ -155,6 +159,8 @@ void onMessageCallback(WebsocketsMessage message) {
         TRANSPARENCY_MOTOR_JITTER = content["transparencyMotorJitter"];
         UNMEASURED_BLOCKING_STATE_INTERVAL = content["unmeasuredBlockingStateInterval"];
         MEASURED_BLOCKING_STATE_INTERVAL = content["measuredBlockingStateInterval"];
+
+        medFilter = new MedianFilter(PROXIMITY_SAMPLE_AMOUNT, 0UL);
 
 
         JsonArray voxelArray = content["voxels"];
@@ -275,7 +281,25 @@ void loop() {
         //keep in mind that if the ultrasoundSensor does not detect something in its MAX_RANGE (450 i think)
         //the returned distance is 0
         //IMPORTANT filter out the 0 values so that it's properly understood as out of range and not 0 cm away
-        long distance = ultrasoundSensor.getValue(10)/57;
+
+        // medFilter->insertValue(ultrasoundSensor.getValue());
+        // long distance = medFilter->getMedian();
+
+        // Serial.println(distance);
+
+        //long distance = LPF(ultrasoundSensor.getValue());
+        // unsigned long avg = 0;
+        // for(int i=0; i<PROXIMITY_SAMPLE_AMOUNT; i++){
+        //     unsigned long temp = ultrasoundSensor.getValue();
+        //     if(temp == 0){
+        //         temp = 450;
+        //     }
+        //     avg+= temp;
+        //     delay(1);
+        // }
+        //long distance = avg/PROXIMITY_SAMPLE_AMOUNT;
+        
+        long distance = ultrasoundSensor.getMedianValue(PROXIMITY_SAMPLE_AMOUNT)/57;
         Serial.println(distance);
         // long filtered_dist = LPF(real_dist);
         // unsigned long distance = LPF(ultrasoundSensor.getValue());
@@ -285,6 +309,9 @@ void loop() {
 
     }
     
+    // 5 7 8 9 10 12 65 78 90 100
+    // 1 2 3 8 7 6 2 1 4 5 9
+    // 
 
     switch (currentState) {
         case JITTER:

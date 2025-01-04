@@ -10,7 +10,8 @@ class UltrasoundSensor
 {
 public:
   UltrasoundSensor(String id, uint8_t triggerEchoPin);
-  unsigned long getValue(int pings);
+  unsigned long getValue();
+  unsigned long getMedianValue(int pings);
 
 private:
   String _id;

@@ -56,9 +56,9 @@ This repository contains the firmware for the hardware modules of the Emergence 
 ## Connecting and Setting Up ESP 
 **Steps 1 to 5 can be skipped if you have the server running on the Raspberry Pi.**  The Raspberry Pi is programmed to start up a Wi-Fi hotspot (NMPRouter) and start the server using `docker-compose up`. 
 - **To connect Raspberry Pi to LAN and have internet access, pull from the server repo/develop:**  
-  - Connect to NMPRouter2.0, password keepitquantum
+  - Connect to NMPRouter 2.0, password keepitquantum
  
-  - `ssh nmprouter@192.168.0.101`, password admin
+  - `ssh admin@raspberrypi`, password admin
 
 
  
@@ -71,13 +71,13 @@ docker ps
   - **To run the server:** 
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
  
   - **If any error appears, first run:** 
 
 ```bash
-docker-compose down
+docker compose down
 ```
  
     - Especially if the error is: `ERROR: for nodeapp 'ContainerConfig'`
