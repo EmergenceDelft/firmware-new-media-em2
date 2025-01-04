@@ -48,7 +48,7 @@ void setup() {
 
     
     pinMode(BUTTON_PIN, INPUT_PULLUP);
-    pinMode(LED_BUILTIN, OUTPUT);
+    // pinMode(LED_BUILTIN, OUTPUT); 
 }
 
 void loop() {
@@ -58,13 +58,13 @@ void loop() {
     client.send(str);
 
     //Set led to ON
-    digitalWrite(LED_BUILTIN, LOW);
+    //digitalWrite(LED_BUILTIN, LOW);
 
     // Wait BUTTON_DELAY for next command
     delay(BUTTON_DELAY);
 
     //Set led to OFF
-    digitalWrite(LED_BUILTIN, HIGH);
+    //digitalWrite(LED_BUILTIN, HIGH);
   }
 }
 
